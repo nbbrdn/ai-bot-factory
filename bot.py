@@ -6,7 +6,7 @@ from aiogram import Bot, Dispatcher
 
 import handlers
 
-logging.basicConfig(level=logging.INFO, filename="bot.log")
+logging.basicConfig(level=logging.INFO)
 tg_token = os.environ.get("BOT_TOKEN")
 
 
