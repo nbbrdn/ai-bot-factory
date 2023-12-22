@@ -22,27 +22,33 @@ services:
       - DOZZLE_LEVEL=info
       - DOZZLE_TAILSIZE=300
       - DOZZLE_FILTER="status=running"
+      - DOZZLE_ADDR=0.0.0.0:8080
     image: amir20/dozzle:latest
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock:ro
       - /etc/localtime:/etc/localtime:ro
       - /etc/timezone:/etc/timezone:ro
-    labels:
-      - "traefik.enable=true"
-      - "traefik.docker.network=proxy"
-      - "traefik.http.routers.dozzle-web.rule=Host(`sn.bayborodin.ru`)"
 
   traefik:
-    image: traefik
+    image: traefik:v2.8
     container_name: traefik
     restart: unless-stopped
-    command: --api.insecure=true --providers.docker
+    security_opt:
+      - no-new-privileges:true
     ports:
       - 80:80
-      - 8080:8080
-      - 443:443
+      - 443:443 
     volumes:
       - /etc/localtime:/etc/localtime:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./data/traefik.yml:/traefik.yml:ro
+      - ./ssl:/ssl
+      - ./data/custom/:/custom/:ro
     labels:
       - "traefik.enable=true"
+      - "traefik.http.routers.traefik.entrypoints=https"
+      - "traefik.http.routers.traefik.rule=Host(`sn.bayborodin.ru`)"
+      - "traefik.http.routers.traefik.tls=true"
+      - "traefik.http.routers.traefik.tls.certresolver=letsEncrypt"
+      - "traefik.http.routers.traefik.service=api@internal"
+      - "traefik.http.services.traefik-traefik.loadbalancer.server.port=888"
