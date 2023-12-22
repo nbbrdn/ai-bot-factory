@@ -3,6 +3,8 @@ import os
 from openai import OpenAI
 
 api_key = os.environ.get("OPENAI_TOKEN")
+assistant_id = os.environ.get("ASSISTANT_ID")
+
 client = OpenAI(api_key=api_key)
 
 
@@ -17,7 +19,7 @@ async def generate_text(prompt, thread_id) -> dict:
     )
 
     run = client.beta.threads.runs.create(
-        thread_id=thread_id, assistant_id="asst_lYyjxPbAFy8dYVY0HDiUCEbk"
+        thread_id=thread_id, assistant_id=assistant_id
     )
 
     while run.status != "completed":
