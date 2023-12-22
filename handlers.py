@@ -4,7 +4,11 @@ from aiogram.types import Message
 from aiogram.utils.chat_action import ChatActionMiddleware
 from aiogram.enums import ChatAction
 
+import logging
+
 import external
+
+logger = logging.getLogger(__name__)
 
 router = Router()
 router.message.middleware(ChatActionMiddleware())
@@ -28,7 +32,9 @@ async def message_with_text(message: Message):
         threads[user_id] = thread_id
 
     prompt = message.text
+    logging.info(f"user (id={user_id}): {prompt}")
 
     text = await external.generate_text(prompt, thread_id)
 
     await message.answer(text)
+    logging.info(f"bot (id={user_id}): {text}")

@@ -6,12 +6,20 @@ from aiogram import Bot, Dispatcher
 
 import handlers
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s:%(name)s:%(levelname)s:%(message)s"
+)
+logger = logging.getLogger(__name__)
+
+logging.getLogger("httpx").setLevel(logging.ERROR)
+logging.getLogger("aiogram.dispatcher").setLevel(logging.ERROR)
+logging.getLogger("aiogram.event").setLevel(logging.ERROR)
+
 tg_token = os.environ.get("BOT_TOKEN")
 
 
 async def on_startup():
-    logging.info("bot started")
+    logger.info("Bot started")
 
 
 async def main():
