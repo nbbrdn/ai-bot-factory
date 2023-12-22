@@ -14,7 +14,7 @@ threads = {}
 
 @router.message(Command("start"))
 async def cmd_start(message: Message):
-    await message.answer("Привет! Я бот, у которого еще нет описания.")
+    await message.answer("Тут будут две кнопки")
 
 
 @router.message(F.text)
