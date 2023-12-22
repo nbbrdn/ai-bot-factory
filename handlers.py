@@ -1,11 +1,11 @@
-from aiogram import Router, F, flags
+import logging
+import re
+
+from aiogram import F, Router, flags
+from aiogram.enums import ChatAction
 from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram.utils.chat_action import ChatActionMiddleware
-from aiogram.enums import ChatAction
-
-import logging
-import re
 
 import external
 
