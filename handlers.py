@@ -5,6 +5,7 @@ from aiogram.utils.chat_action import ChatActionMiddleware
 from aiogram.enums import ChatAction
 
 import logging
+import re
 
 import external
 
@@ -35,6 +36,8 @@ async def message_with_text(message: Message):
     logging.info(f"user (id={user_id}): {prompt}")
 
     text = await external.generate_text(prompt, thread_id)
+    text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
+    text = re.sub(r"\*(.+?)\*", r"<i>\1</i>", text)
 
     await message.answer(text)
     logging.info(f"bot (id={user_id}): {text}")

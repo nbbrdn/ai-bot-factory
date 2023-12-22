@@ -23,7 +23,7 @@ async def on_startup():
 
 
 async def main():
-    bot = Bot(token=tg_token)
+    bot = Bot(token=tg_token, parse_mode="HTML")
     dp = Dispatcher()
     dp.include_router(handlers.router)
     dp.startup.register(on_startup)
