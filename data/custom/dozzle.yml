@@ -1,14 +1,14 @@
 http:
   routers:
-    grafana:
+    dozzle:
       entryPoints: 
       - https
       service: dozzle
-      rule: Host(`sn.bayborodin.ru`) 
+      rule: Host(`dozzle.sn.bayborodin.ru`) 
       tls:
         certResolver: letsEncrypt
   services:
-    grafana-host:  
+    dozzle-host:  
       loadBalancer:
         servers:
         - url: http://localhost:8080/
