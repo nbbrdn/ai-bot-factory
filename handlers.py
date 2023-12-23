@@ -52,9 +52,7 @@ async def message_with_text(message: Message):
 
     prompt = message.text
     logging.info(f"user (id={user_id}): {prompt}")
-    message = await message.answer(
-        "✍️ минутку, пишу ответ ...", reply_markup=ReplyKeyboardRemove()
-    )
+    message = await message.answer("💬", reply_markup=ReplyKeyboardRemove())
 
     text = await external.generate_text(prompt, thread_id)
     text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)

@@ -7,6 +7,15 @@ from openai import OpenAI
 api_key = os.environ.get("OPENAI_TOKEN")
 assistant_id = os.environ.get("ASSISTANT_ID")
 
+finish_states = [
+    "requires_action",
+    "cancelling",
+    "cancelled",
+    "failed",
+    "completed",
+    "expired",
+]
+
 client = OpenAI(api_key=api_key)
 
 
@@ -24,7 +33,9 @@ async def generate_text(prompt, thread_id) -> dict:
         thread_id=thread_id, assistant_id=assistant_id
     )
 
-    while run.status != "completed":
+    current_status = run.status
+
+    while current_status not in finish_states:
         keep_retrieving_run = client.beta.threads.runs.retrieve(
             thread_id=thread_id, run_id=run.id
         )
@@ -34,6 +45,9 @@ async def generate_text(prompt, thread_id) -> dict:
             break
         time.sleep(3)
 
-    all_messages = client.beta.threads.messages.list(thread_id=thread_id)
+    if current_status != "completed":
+        logging.ERROR(f"got unexpected openai status: {current_status}")
+        return "Ой... что-то пошло не так :("
 
+    all_messages = client.beta.threads.messages.list(thread_id=thread_id)
     return all_messages.data[0].content[0].text.value
