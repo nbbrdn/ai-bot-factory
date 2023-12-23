@@ -11,9 +11,9 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-logging.getLogger("httpx").setLevel(logging.ERROR)
-logging.getLogger("aiogram.dispatcher").setLevel(logging.ERROR)
-logging.getLogger("aiogram.event").setLevel(logging.ERROR)
+# logging.getLogger("httpx").setLevel(logging.ERROR)
+# logging.getLogger("aiogram.dispatcher").setLevel(logging.ERROR)
+# logging.getLogger("aiogram.event").setLevel(logging.ERROR)
 
 tg_token = os.environ.get("BOT_TOKEN")
 
