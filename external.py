@@ -1,3 +1,4 @@
+import logging
 import os
 
 from openai import OpenAI
@@ -26,6 +27,7 @@ async def generate_text(prompt, thread_id) -> dict:
         keep_retrieving_run = client.beta.threads.runs.retrieve(
             thread_id=thread_id, run_id=run.id
         )
+        logging.info(f"openai api request status): {run.status}")
 
         if keep_retrieving_run.status == "completed":
             break
