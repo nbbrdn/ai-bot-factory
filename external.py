@@ -33,20 +33,21 @@ async def generate_text(prompt, thread_id) -> dict:
         thread_id=thread_id, assistant_id=assistant_id
     )
 
-    current_status = run.status
+    keep_retrieving_status = None
 
-    while current_status not in finish_states:
+    while keep_retrieving_status not in finish_states:
         keep_retrieving_run = client.beta.threads.runs.retrieve(
             thread_id=thread_id, run_id=run.id
         )
-        logging.info(f"openai api request status): {run.status}")
+        keep_retrieving_status = keep_retrieving_run.status
+        logging.info(f"openai api request status): {keep_retrieving_status}")
 
-        if keep_retrieving_run.status == "completed":
+        if keep_retrieving_status == "completed":
             break
         time.sleep(3)
 
-    if current_status != "completed":
-        logging.ERROR(f"got unexpected openai status: {current_status}")
+    if keep_retrieving_status != "completed":
+        logging.ERROR(f"got unexpected openai status: {keep_retrieving_status}")
         return "Ой... что-то пошло не так :("
 
     all_messages = client.beta.threads.messages.list(thread_id=thread_id)
