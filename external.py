@@ -1,5 +1,6 @@
 import logging
 import os
+import time
 
 from openai import OpenAI
 
@@ -31,6 +32,7 @@ async def generate_text(prompt, thread_id) -> dict:
 
         if keep_retrieving_run.status == "completed":
             break
+        time.sleep(3)
 
     all_messages = client.beta.threads.messages.list(thread_id=thread_id)
 
