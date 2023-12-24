@@ -1,6 +1,7 @@
 import logging
 import re
 
+import external
 from aiogram import F, Router, flags
 from aiogram.enums import ChatAction
 from aiogram.filters import Command
@@ -11,8 +12,6 @@ from aiogram.types import (
     ReplyKeyboardRemove,
 )
 from aiogram.utils.chat_action import ChatActionMiddleware
-
-import external
 
 logger = logging.getLogger(__name__)
 

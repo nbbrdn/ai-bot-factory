@@ -2,9 +2,8 @@ import asyncio
 import logging
 import os
 
-from aiogram import Bot, Dispatcher
-
 import handlers
+from aiogram import Bot, Dispatcher
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s:%(name)s:%(levelname)s:%(message)s"
