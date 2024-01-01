@@ -1,14 +1,13 @@
  {% extends 'base.html' %}
 
 {% block content %}
-    <h1>{% block title %} Dialogs {% endblock %}</h1>
-
-    <table>
+    <h2>Dialogs</h2>
+    <table id="data" class="table table-striped">
         <thead>
             <tr>
                 <th>ID</th>
-                <th>Date and Time</th>
-                <th>User ID</th>
+                <th>Date</th>
+                <th>User</th>
                 <th>Actor</th>
                 <th>Message</th>
             </tr>
@@ -25,4 +24,12 @@
             {% endfor %}
         </tbody>
     </table>
+{% endblock %}
+
+{% block scripts %}
+  <script>
+    $(document).ready(function () {
+      $('#data').DataTable();
+    });
+  </script>
 {% endblock %}
