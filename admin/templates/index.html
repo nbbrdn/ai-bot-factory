@@ -1,0 +1,28 @@
+ {% extends 'base.html' %}
+
+{% block content %}
+    <h1>{% block title %} Dialogs {% endblock %}</h1>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Date and Time</th>
+                <th>User ID</th>
+                <th>Actor</th>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for dialog in dialogs %}
+            <tr>
+                <td>{{ dialog[0] }}</td>
+                <td>{{ dialog[4] }}</td>
+                <td>{{ dialog[1] }}</td>
+                <td>{{ dialog[2] }}</td>
+                <td>{{ dialog[3] }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

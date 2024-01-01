@@ -1,6 +1,7 @@
 import logging
 import re
 
+import config
 import external
 from aiogram import F, Router, flags
 from aiogram.enums import ChatAction
@@ -12,6 +13,14 @@ from aiogram.types import (
     ReplyKeyboardRemove,
 )
 from aiogram.utils.chat_action import ChatActionMiddleware
+from db.orm import (
+    count_referrals,
+    count_users,
+    has_referrer,
+    is_registered,
+    save_message,
+    update_referrer,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +32,18 @@ threads = {}
 
 @router.message(Command("start"))
 async def cmd_start(message: Message):
+    user_id = message.from_user.id
+    hasref = await has_referrer(user_id)
+
+    if " " in message.text and not hasref:
+        referrer_candidate = message.text.split()[1]
+        try:
+            referrer_candidate = int(referrer_candidate)
+            if user_id != referrer_candidate and is_registered(referrer_candidate):
+                update_referrer(user_id, referrer_candidate)
+        except ValueError:
+            pass
+
     kb = [
         [KeyboardButton(text="Давай разберем случайный кейс")],
         [KeyboardButton(text="Предложи список из 10 случайных кейсов")],
@@ -39,6 +60,29 @@ async def cmd_start(message: Message):
     )
 
 
+@router.message(Command("ref"))
+async def cmd_ref(message: Message):
+    await message.answer(
+        "Вот ваша ссылка для приглашения новых пользователей: "
+        f"{config.BOT_URL}?start={message.from_user.id}"
+    )
+
+
+@router.message(Command("refstat"))
+async def cmd_refstat(message: Message):
+    user_id = message.from_user.id
+    referrals_cnt = await count_referrals(user_id)
+    await message.answer(
+        f"По вашей реферальной ссылке зарегистрировано {referrals_cnt} пользователей."
+    )
+
+
+@router.message(Command("stat"))
+async def cmd_stat(message: Message):
+    users_cnt = await count_users()
+    await message.answer(f"Всего зарегистрированных пользователей: {users_cnt}")
+
+
 @router.message(F.text)
 @flags.chat_action(ChatAction.TYPING)
 async def message_with_text(message: Message):
@@ -50,7 +94,9 @@ async def message_with_text(message: Message):
         threads[user_id] = thread_id
 
     prompt = message.text
-    logging.info(f"user (id={user_id}): {prompt}")
+    # logging.info(f"user (id={user_id}): {prompt}")
+    await save_message(user_id, prompt, True)
+
     message = await message.answer(
         "✍️ минутку, пишу ответ ...", reply_markup=ReplyKeyboardRemove()
     )
@@ -62,4 +108,5 @@ async def message_with_text(message: Message):
     await message.delete()
 
     await message.answer(text)
-    logging.info(f"bot (id={user_id}): {text}")
+    await save_message(user_id, text, False)
+    # logging.info(f"bot (id={user_id}): {text}")

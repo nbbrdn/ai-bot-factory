@@ -13,6 +13,8 @@ services:
       options:
         max-size: 10m
         max-file: "10"
+    depends_on:
+      - db
   
   dozzle:
     container_name: dozzle
@@ -52,29 +54,17 @@ services:
     depends_on:
       - db
 
-  backend:
-    container_name: backend
+  admin-panel:
+    container_name: admin-panel
     build:
-      context: ./backend
-    depends_on:
-      - db
-    command: bash -c 'while !</dev/tcp/db/5432; do sleep 1; done; uvicorn main:app --host 0.0.0.0 --port 8000'
-    volumes:
-      - ./backend/app:/usr/src/app
+      context: ./admin
     ports:
-      - ${APP_HOST_PORT}:8000
+      - 5000:5000
     restart: always
     env_file:
       - .env
-
-  frontend:
-    container_name: frontend
-    build:
-      context: ./frontend
-    ports:
-      - 80:80
-    restart: always
-
+    depends_on:
+      - db
 
 volumes:
   pgdata:
