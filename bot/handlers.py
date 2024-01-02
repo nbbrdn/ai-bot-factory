@@ -39,7 +39,8 @@ async def cmd_start(message: Message):
         referrer_candidate = message.text.split()[1]
         try:
             referrer_candidate = int(referrer_candidate)
-            if user_id != referrer_candidate and is_registered(referrer_candidate):
+            registred = await is_registered(referrer_candidate)
+            if user_id != referrer_candidate and registred:
                 update_referrer(user_id, referrer_candidate)
         except ValueError:
             pass
