@@ -41,7 +41,7 @@ async def cmd_start(message: Message):
             referrer_candidate = int(referrer_candidate)
             registred = await is_registered(referrer_candidate)
             if user_id != referrer_candidate and registred:
-                update_referrer(user_id, referrer_candidate)
+                await update_referrer(user_id, referrer_candidate)
         except ValueError:
             pass
 
@@ -74,7 +74,7 @@ async def cmd_refstat(message: Message):
     user_id = message.from_user.id
     referrals_cnt = await count_referrals(user_id)
     await message.answer(
-        f"По вашей реферальной ссылке зарегистрировано {referrals_cnt} пользователей."
+        f"Зарегистрировано пользователей по вашей реферальной ссылке: {referrals_cnt}"
     )
 
 
