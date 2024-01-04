@@ -16,6 +16,15 @@ from aiogram.types import (
 )
 from openai import OpenAI
 
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s:%(name)s:%(levelname)s:%(message)s"
+)
+logger = logging.getLogger(__name__)
+
+logging.getLogger("httpx").setLevel(logging.ERROR)
+logging.getLogger("aiogram.dispatcher").setLevel(logging.ERROR)
+logging.getLogger("aiogram.event").setLevel(logging.ERROR)
+
 # https://t.me/aifabriqbot
 BOT_TOKEN = os.environ.get("FABRIQ_BOT_TOKEN")
 OPENAI_TOKEN = os.environ.get("OPENAI_TOKEN")
@@ -170,11 +179,6 @@ async def process_activate_assistant_number_sent(message: Message, state: FSMCon
         thread = client.beta.threads.create()
         await state.update_data(thread_id=thread.id)
 
-        run = client.beta.threads.runs.create(
-            thread_id=thread.id, assistant_id=assistant["id"]
-        )
-        await state.update_data(run_id=run.id)
-
         await message.answer(
             text="Можете начинать общение с асисстентом.\n\n"
             "Чтобы закончить общение, введите команду /stopassistant"
@@ -187,12 +191,22 @@ async def process_activate_assistant_number_sent(message: Message, state: FSMCon
 @dp.message(StateFilter(FSMActivateAssistant.use_assistant))
 async def proccess_assistant_conversation(message: Message, state: FSMContext):
     data = await state.get_data()
-    run_id = data["run_id"]
+    thread_id = data["thread_id"]
+    assistant_id = data["assistant_id"]
+
+    client.beta.threads.messages.create(
+        thread_id=thread_id, role="user", content=message.text
+    )
+
+    run = client.beta.threads.runs.create(
+        thread_id=thread_id, assistant_id=assistant_id
+    )
+
     keep_retrieving_status = None
     await message.answer("Минуту... пишу ответ")
     while keep_retrieving_status not in finish_states:
         keep_retrieving_run = client.beta.threads.runs.retrieve(
-            thread_id=data["thread_id"], run_id=run_id
+            thread_id=data["thread_id"], run_id=run.id
         )
         keep_retrieving_status = keep_retrieving_run.status
         logging.info(f"openai api request status): {keep_retrieving_status}")
@@ -206,6 +220,7 @@ async def proccess_assistant_conversation(message: Message, state: FSMContext):
         await message.answer(text="Ой... что-то пошло не так :(")
 
     all_messages = client.beta.threads.messages.list(thread_id=data["thread_id"])
+    pprint(all_messages)
     gpt_response = all_messages.data[0].content[0].text.value
     await message.answer(gpt_response)
 
@@ -345,18 +360,18 @@ async def process_assistant_instruction_sent(message: Message, state: FSMContext
 # и выводить из машины состояний
 @dp.message(StateFilter(FSMCreateAssistant.upload_assistant_file))
 async def process_assistant_file_upload(message: Message, state: FSMContext):
+    file_ids = []
     document = message.document
-    if document.file_size > 0:
+    if document and document.file_size > 0:
         file_path = f"{WORK_DIR}//{document.file_name}"
         await bot.download(document, file_path)
         await state.update_data(file=file_path)
+        file = client.files.create(file=open(file_path, "rb"), purpose="assistants")
+        file_ids.append(file.id)
         await message.answer("Отлично! Файл загружен.")
     await message.answer(text="Приступаю к созданию ассистента...")
 
     data = await state.get_data()
-
-    file = client.files.create(file=open(data["file"], "rb"), purpose="assistants")
-    pprint(file)
 
     assistant = client.beta.assistants.create(
         name=data["assistant_name"],
@@ -364,7 +379,7 @@ async def process_assistant_file_upload(message: Message, state: FSMContext):
         model="gpt-4-1106-preview",
         tools=[{"type": "retrieval"}],
         metadata={"client_id": message.from_user.id},
-        file_ids=[file.id],
+        file_ids=file_ids,
     )
 
     pprint(assistant)
