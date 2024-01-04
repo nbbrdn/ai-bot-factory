@@ -1,4 +1,6 @@
+import logging
 import os
+import time
 from pprint import pprint
 
 from aiogram import Bot, Dispatcher, F
@@ -18,6 +20,17 @@ from openai import OpenAI
 BOT_TOKEN = os.environ.get("FABRIQ_BOT_TOKEN")
 OPENAI_TOKEN = os.environ.get("OPENAI_TOKEN")
 
+WORK_DIR = os.path.abspath(os.path.dirname(__file__))
+
+finish_states = [
+    "requires_action",
+    "cancelling",
+    "cancelled",
+    "failed",
+    "completed",
+    "expired",
+]
+
 client = OpenAI(api_key=OPENAI_TOKEN)
 
 storage = MemoryStorage()
@@ -28,11 +41,17 @@ dp = Dispatcher()
 class FSMCreateAssistant(StatesGroup):
     fill_assistant_name = State()
     fill_assistant_instrustion = State()
+    upload_assistant_file = State()
 
 
 class FSMDeleteAssistant(StatesGroup):
     enter_assistant_number = State()
     confirm_del_action = State()
+
+
+class FSMActivateAssistant(StatesGroup):
+    activate_assistant = State()
+    use_assistant = State()
 
 
 # Этот хэндлер будет срабатывать на команду /start вне состояний
@@ -70,24 +89,6 @@ async def process_cancel_command_state(message: Message, state: FSMContext):
     await state.clear()
 
 
-# Этот хэндлер будет срабатывать на команду "/test" в состоянии по умолчанию
-@dp.message(Command(commands="test"), StateFilter(default_state))
-async def process_test_command(message: Message):
-    assistant = client.beta.assistants.create(
-        name="Test assistant",
-        instructions="Ты чат-бот, который любит потравить анекдоты",
-        model="gpt-4-1106-preview",
-        tools=[{"type": "retrieval"}],
-        metadata={"client_id": message.from_user.id},
-    )
-
-    pprint(assistant)  # asst_DsOIRbyyqvYVHtBSbSbapwBX
-
-    # my_assistants = client.beta.assistants.list()
-    # pprint(my_assistants.data)
-    await message.answer(text="test!")
-
-
 # Этот хэндлер будет срабатывать на команду "/assistants" в состоянии по умолчанию
 @dp.message(Command(commands="assistants"), StateFilter(default_state))
 async def process_assistants_command(message: Message):
@@ -114,6 +115,114 @@ async def process_assistants_command(message: Message):
         await message.answer(
             text="У вас нет асисстентов. Чтобы создать, введите команду /newassistant"
         )
+
+
+# Этот хэндлер будет срабатывать на команду /startassistant
+@dp.message(Command(commands="startassistant"), StateFilter(default_state))
+async def process_startassistant_command(message: Message, state: FSMContext):
+    my_assistants = []
+    telegram_user_id = message.from_user.id
+    assistants = client.beta.assistants.list()
+    data = assistants.data
+    for assistant in data:
+        metadata = assistant.metadata
+        if "client_id" in metadata:
+            try:
+                client_id = int(metadata["client_id"])
+            except ValueError:
+                client_id = 0
+            if client_id == telegram_user_id:
+                my_assistants.append({"id": assistant.id, "name": assistant.name})
+
+    if my_assistants:
+        await state.update_data(assistants=my_assistants)
+        text = ""
+        for i, assistant in enumerate(my_assistants, start=1):
+            text += f"{i}. {assistant['name']}\n"
+        await message.answer(text="Вот список ваших асисстентов: ")
+        await message.answer(text=text)
+        await message.answer("Введите номер ассистента, с которым хотите пообщаться:")
+        await state.set_state(FSMActivateAssistant.activate_assistant)
+    else:
+        await message.answer(
+            text="У вас нет асисстентов. Чтобы создать, введите команду /newassistant"
+        )
+        await state.clear()
+
+
+# Это хэндлер будет срабатывать, если введен корректный номер асисстента,
+# и активировать диалог с ним.
+@dp.message(
+    StateFilter(FSMActivateAssistant.activate_assistant),
+    lambda x: x.text.isdigit() and int(x.text) >= 0,
+)
+async def process_activate_assistant_number_sent(message: Message, state: FSMContext):
+    assistant_idx = int(message.text) - 1
+    data = await state.get_data()
+    assistants = data["assistants"]
+    if len(assistants) <= assistant_idx:
+        await message.answer(text="Ассистента с указанным номером не существует.")
+    else:
+        assistant = assistants[assistant_idx]
+        await state.update_data(assistant_id=assistant["id"])
+
+    if assistant:
+        thread = client.beta.threads.create()
+        await state.update_data(thread_id=thread.id)
+
+        run = client.beta.threads.runs.create(
+            thread_id=thread.id, assistant_id=assistant["id"]
+        )
+        await state.update_data(run_id=run.id)
+
+        await message.answer(
+            text="Можете начинать общение с асисстентом.\n\n"
+            "Чтобы закончить общение, введите команду /stopassistant"
+        )
+
+        await state.set_state(FSMActivateAssistant.use_assistant)
+
+
+# use_assistant
+@dp.message(StateFilter(FSMActivateAssistant.use_assistant))
+async def proccess_assistant_conversation(message: Message, state: FSMContext):
+    data = await state.get_data()
+    run_id = data["run_id"]
+    keep_retrieving_status = None
+    await message.answer("Минуту... пишу ответ")
+    while keep_retrieving_status not in finish_states:
+        keep_retrieving_run = client.beta.threads.runs.retrieve(
+            thread_id=data["thread_id"], run_id=run_id
+        )
+        keep_retrieving_status = keep_retrieving_run.status
+        logging.info(f"openai api request status): {keep_retrieving_status}")
+
+        if keep_retrieving_status == "completed":
+            break
+        time.sleep(3)
+
+    if keep_retrieving_status != "completed":
+        logging.ERROR(f"got unexpected openai status: {keep_retrieving_status}")
+        await message.answer(text="Ой... что-то пошло не так :(")
+
+    all_messages = client.beta.threads.messages.list(thread_id=data["thread_id"])
+    gpt_response = all_messages.data[0].content[0].text.value
+    await message.answer(gpt_response)
+
+
+@dp.message(
+    Command(commands="stopassistant"), StateFilter(FSMActivateAssistant.use_assistant)
+)
+async def process_cancel_assistant_conversation_state(
+    message: Message, state: FSMContext
+):
+    await message.answer(
+        text="Вы прервали общение с асисстентом\n\n"
+        "Чтобы снова перейти к общению - "
+        "отправьте команду /startassistant"
+    )
+    # Сбрасываем состояние и очищаем данные, полученные внутри состояний
+    await state.clear()
 
 
 # Этот хэндлер будет срабатывать на команду /delassistant, выводить
@@ -222,12 +331,43 @@ async def process_assistant_name_sent(message: Message, state: FSMContext):
     await state.set_state(FSMCreateAssistant.fill_assistant_instrustion)
 
 
-# Этот хэндлер будет срабатывать, если введена корректная инструкция
-# и выводить из машины состояний
+# Это хэндлер будет срабатывать, если введена корректная инструкция
+# и запрашивает загрузку файла
 @dp.message(StateFilter(FSMCreateAssistant.fill_assistant_instrustion))
 async def process_assistant_instruction_sent(message: Message, state: FSMContext):
     # Сохраняем инструкцию в хранилище по ключу "assistant_instruction"
     await state.update_data(assistant_instruction=message.text)
+    await message.answer(text="Загрузите файл базы знаний")
+    await state.set_state(FSMCreateAssistant.upload_assistant_file)
+
+
+# Этот хэндлер будет срабатывать, после загрузки файла
+# и выводить из машины состояний
+@dp.message(StateFilter(FSMCreateAssistant.upload_assistant_file))
+async def process_assistant_file_upload(message: Message, state: FSMContext):
+    document = message.document
+    if document.file_size > 0:
+        file_path = f"{WORK_DIR}//{document.file_name}"
+        await bot.download(document, file_path)
+        await state.update_data(file=file_path)
+        await message.answer("Отлично! Файл загружен.")
+    await message.answer(text="Приступаю к созданию ассистента...")
+
+    data = await state.get_data()
+
+    file = client.files.create(file=open(data["file"], "rb"), purpose="assistants")
+    pprint(file)
+
+    assistant = client.beta.assistants.create(
+        name=data["assistant_name"],
+        instructions=data["assistant_instruction"],
+        model="gpt-4-1106-preview",
+        tools=[{"type": "retrieval"}],
+        metadata={"client_id": message.from_user.id},
+        file_ids=[file.id],
+    )
+
+    pprint(assistant)
 
     # Завершаем машину состояний
     await state.clear()
