@@ -25,8 +25,7 @@ logging.getLogger("httpx").setLevel(logging.ERROR)
 logging.getLogger("aiogram.dispatcher").setLevel(logging.ERROR)
 logging.getLogger("aiogram.event").setLevel(logging.ERROR)
 
-# https://t.me/aifabriqbot
-BOT_TOKEN = os.environ.get("FABRIQ_BOT_TOKEN")
+BOT_TOKEN = os.environ.get("FACTORY_BOT_TOKEN")
 OPENAI_TOKEN = os.environ.get("OPENAI_TOKEN")
 
 WORK_DIR = os.path.abspath(os.path.dirname(__file__))

@@ -16,10 +16,10 @@ services:
     depends_on:
       - db
 
-  fabriq:
-    container_name: fabriq
+  factory:
+    container_name: factory
     build:
-      context: ./fabriq
+      context: ./factory
     restart: always
     env_file:
       - .env
