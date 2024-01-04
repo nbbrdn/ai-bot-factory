@@ -63,10 +63,20 @@ class FSMActivateAssistant(StatesGroup):
     use_assistant = State()
 
 
-# Этот хэндлер будет срабатывать на команду /start вне состояний
-# и предлагать перейти к заполнению анкеты, отправив команду /newassistant
 @dp.message(CommandStart(), StateFilter(default_state))
-async def process_start_command(message: Message):
+async def process_start_command(message: Message) -> None:
+    """
+    Handles the /start command for the Telegram bot.
+
+    Sends a welcome message introducing the bot's purpose of demonstrating the creation
+    of OpenAI assistants.
+
+    Args:
+        message (Message): The incoming message object.
+
+    Returns:
+        None
+    """
     await message.answer(
         text="Это бот демонстрирует создание OpenAI ассистентов\n\n"
         "Чтобы перейти к созданию ассистента - "
@@ -74,10 +84,20 @@ async def process_start_command(message: Message):
     )
 
 
-# Этот хэндлер будет срабатывать на команду "/cancel" в состоянии
-# по умолчанию и сообщать, что эта команда работает внутри машины состояний
 @dp.message(Command(commands="cancel"), StateFilter(default_state))
-async def process_cancel_command(message: Message):
+async def process_cancel_command(message: Message) -> None:
+    """
+    Handles the /cancel command for the bot.
+
+    Sends a message indicating that there's nothing to cancel and provides guidance on
+    creating an assistant.
+
+    Args:
+        message (Message): The incoming message object.
+
+    Returns:
+        None
+    """
     await message.answer(
         text="Отменять нечего.\n\n"
         "Чтобы перейти к созданию ассистента - "
@@ -85,22 +105,43 @@ async def process_cancel_command(message: Message):
     )
 
 
-# Этот хэндлер будет срабатывать на команду "/cancel" в любых состояниях,
-# кроме состояния по умолчанию, и отключать машину состояний
 @dp.message(Command(commands="cancel"), ~StateFilter(default_state))
-async def process_cancel_command_state(message: Message, state: FSMContext):
+async def process_cancel_command_state(message: Message, state: FSMContext) -> None:
+    """
+    Handles the /cancel command when the bot is in a non-default state.
+
+    Notifies the user about exiting the state machine and provides guidance on starting
+    over.
+
+    Args:
+        message (Message): The incoming message object.
+        state (FSMContext): The current state of the finite state machine.
+
+    Returns:
+        None
+    """
     await message.answer(
         text="Вы вышли из машины состояний\n\n"
         "Чтобы снова перейти к заполнению анкеты - "
         "отправьте команду /newassistant"
     )
-    # Сбрасываем состояние и очищаем данные, полученные внутри состояний
+
     await state.clear()
 
 
-# Этот хэндлер будет срабатывать на команду "/assistants" в состоянии по умолчанию
 @dp.message(Command(commands="assistants"), StateFilter(default_state))
-async def process_assistants_command(message: Message):
+async def process_assistants_command(message: Message) -> None:
+    """
+    Handles the /assistants command to list user-specific assistants.
+
+    Retrieves and displays a list of assistants associated with the user's Telegram ID.
+
+    Args:
+        message (Message): The incoming message object.
+
+    Returns:
+        None
+    """
     my_assistants = []
     telegram_user_id = message.from_user.id
     assistants = client.beta.assistants.list()
@@ -126,9 +167,22 @@ async def process_assistants_command(message: Message):
         )
 
 
-# Этот хэндлер будет срабатывать на команду /startassistant
 @dp.message(Command(commands="startassistant"), StateFilter(default_state))
-async def process_startassistant_command(message: Message, state: FSMContext):
+async def process_startassistant_command(message: Message, state: FSMContext) -> None:
+    """
+    Handles the /startassistant command to initiate interaction with a specific
+    assistant.
+
+    Retrieves the user's assistants and prompts the user to choose an assistant to
+    interact with.
+
+    Args:
+        message (Message): The incoming message object.
+        state (FSMContext): The current state of the finite state machine.
+
+    Returns:
+        None
+    """
     my_assistants = []
     telegram_user_id = message.from_user.id
     assistants = client.beta.assistants.list()
@@ -159,13 +213,26 @@ async def process_startassistant_command(message: Message, state: FSMContext):
         await state.clear()
 
 
-# Это хэндлер будет срабатывать, если введен корректный номер асисстента,
-# и активировать диалог с ним.
 @dp.message(
     StateFilter(FSMActivateAssistant.activate_assistant),
     lambda x: x.text.isdigit() and int(x.text) >= 0,
 )
-async def process_activate_assistant_number_sent(message: Message, state: FSMContext):
+async def process_activate_assistant_number_sent(
+    message: Message, state: FSMContext
+) -> None:
+    """
+    Processes the assistant number sent by the user to activate a specific assistant.
+
+    Retrieves the selected assistant based on the provided number and initiates
+    communication with it.
+
+    Args:
+        message (Message): The incoming message object.
+        state (FSMContext): The current state of the finite state machine.
+
+    Returns:
+        None
+    """
     assistant_idx = int(message.text) - 1
     data = await state.get_data()
     assistants = data["assistants"]
@@ -189,7 +256,7 @@ async def process_activate_assistant_number_sent(message: Message, state: FSMCon
 
 # use_assistant
 @dp.message(StateFilter(FSMActivateAssistant.use_assistant))
-async def proccess_assistant_conversation(message: Message, state: FSMContext):
+async def proccess_assistant_conversation(message: Message, state: FSMContext) -> None:
     data = await state.get_data()
     thread_id = data["thread_id"]
     assistant_id = data["assistant_id"]
@@ -230,13 +297,12 @@ async def proccess_assistant_conversation(message: Message, state: FSMContext):
 )
 async def process_cancel_assistant_conversation_state(
     message: Message, state: FSMContext
-):
+) -> None:
     await message.answer(
         text="Вы прервали общение с асисстентом\n\n"
         "Чтобы снова перейти к общению - "
         "отправьте команду /startassistant"
     )
-    # Сбрасываем состояние и очищаем данные, полученные внутри состояний
     await state.clear()
 
 
@@ -244,7 +310,7 @@ async def process_cancel_assistant_conversation_state(
 # список асисстентов пользователя и переводить в состояние ожидания ввода номера
 # ассистента для удаления
 @dp.message(Command(commands="delassistant"), StateFilter(default_state))
-async def process_delassistant_command(message: Message, state: FSMContext):
+async def process_delassistant_command(message: Message, state: FSMContext) -> None:
     my_assistants = []
     telegram_user_id = message.from_user.id
     assistants = client.beta.assistants.list()
@@ -281,7 +347,7 @@ async def process_delassistant_command(message: Message, state: FSMContext):
     StateFilter(FSMDeleteAssistant.enter_assistant_number),
     lambda x: x.text.isdigit() and int(x.text) >= 0,
 )
-async def process_assistant_number_sent(message: Message, state: FSMContext):
+async def process_assistant_number_sent(message: Message, state: FSMContext) -> None:
     assistant_idx = int(message.text) - 1
     data = await state.get_data()
     assistants = data["assistants"]
@@ -310,7 +376,7 @@ async def process_assistant_number_sent(message: Message, state: FSMContext):
 )
 async def process_assistant_delete_confirm_press(
     callback: CallbackQuery, state: FSMContext
-):
+) -> None:
     if callback.data == "yes":
         data = await state.get_data()
         assistant_id = data["assistant_id_to_delete"]
@@ -327,7 +393,7 @@ async def process_assistant_delete_confirm_press(
     Command(commands="newassistant"),
     StateFilter(default_state),
 )
-async def process_newassistant_command(message: Message, state: FSMContext):
+async def process_newassistant_command(message: Message, state: FSMContext) -> None:
     await message.answer(text="Пожалуйста введите имя ассистента")
     # Устанавливаем состояние ожидание ввода названия ассистента
     await state.set_state(FSMCreateAssistant.fill_assistant_name)
@@ -336,7 +402,7 @@ async def process_newassistant_command(message: Message, state: FSMContext):
 # Этот хэндлер будет срабатывать, если введено корректное имя
 # и переводить в состояние ожидания ввода инструкции
 @dp.message(StateFilter(FSMCreateAssistant.fill_assistant_name))
-async def process_assistant_name_sent(message: Message, state: FSMContext):
+async def process_assistant_name_sent(message: Message, state: FSMContext) -> None:
     # Сохраняем введенное имя в хранилище по ключу "assistant_name"
     await state.update_data(assistant_name=message.text)
     await message.answer(
@@ -349,7 +415,9 @@ async def process_assistant_name_sent(message: Message, state: FSMContext):
 # Это хэндлер будет срабатывать, если введена корректная инструкция
 # и запрашивает загрузку файла
 @dp.message(StateFilter(FSMCreateAssistant.fill_assistant_instrustion))
-async def process_assistant_instruction_sent(message: Message, state: FSMContext):
+async def process_assistant_instruction_sent(
+    message: Message, state: FSMContext
+) -> None:
     # Сохраняем инструкцию в хранилище по ключу "assistant_instruction"
     await state.update_data(assistant_instruction=message.text)
     await message.answer(text="Загрузите файл базы знаний")
@@ -359,7 +427,7 @@ async def process_assistant_instruction_sent(message: Message, state: FSMContext
 # Этот хэндлер будет срабатывать, после загрузки файла
 # и выводить из машины состояний
 @dp.message(StateFilter(FSMCreateAssistant.upload_assistant_file))
-async def process_assistant_file_upload(message: Message, state: FSMContext):
+async def process_assistant_file_upload(message: Message, state: FSMContext) -> None:
     file_ids = []
     document = message.document
     if document and document.file_size > 0:
@@ -393,7 +461,7 @@ async def process_assistant_file_upload(message: Message, state: FSMContext):
 # Этот хэндлер будет срабатывать на любые сообщения, кроме тех
 # для которых есть отдельные хэндлеры, вне состояний
 @dp.message(StateFilter(default_state))
-async def send_echo(message: Message):
+async def send_echo(message: Message) -> None:
     await message.reply(text="Извините, моя твоя не понимать")
 
 
