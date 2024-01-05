@@ -6,7 +6,7 @@ from pprint import pprint
 from aiogram import Bot, Dispatcher, F
 from aiogram.filters import Command, CommandStart, StateFilter
 from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup, default_state
+from aiogram.fsm.state import default_state
 from aiogram.fsm.storage.memory import MemoryStorage
 from aiogram.types import (
     CallbackQuery,
@@ -15,6 +15,7 @@ from aiogram.types import (
     Message,
 )
 from openai import OpenAI
+from states import FSMActivateAssistant, FSMCreateAssistant, FSMDeleteAssistant
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s:%(name)s:%(levelname)s:%(message)s"
@@ -44,22 +45,6 @@ client = OpenAI(api_key=OPENAI_TOKEN)
 storage = MemoryStorage()
 bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
-
-
-class FSMCreateAssistant(StatesGroup):
-    fill_assistant_name = State()
-    fill_assistant_instrustion = State()
-    upload_assistant_file = State()
-
-
-class FSMDeleteAssistant(StatesGroup):
-    enter_assistant_number = State()
-    confirm_del_action = State()
-
-
-class FSMActivateAssistant(StatesGroup):
-    activate_assistant = State()
-    use_assistant = State()
 
 
 @dp.message(CommandStart(), StateFilter(default_state))
