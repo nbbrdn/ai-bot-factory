@@ -4,10 +4,10 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import Message
 
-dp = Router()
+router = Router()
 
 
-@dp.message(
+@router.message(
     CommandStart(),
     StateFilter(default_state),
 )
@@ -31,7 +31,7 @@ async def proccess_start_command(message: Message) -> None:
     )
 
 
-@dp.message(Command(commands="help"), StateFilter(default_state))
+@router.message(Command(commands="help"), StateFilter(default_state))
 async def proccess_help_command(message: Message) -> None:
     """
     Handles the /help command for the bot.
@@ -53,7 +53,7 @@ async def proccess_help_command(message: Message) -> None:
     )
 
 
-@dp.message(Command(commands="cancel"), StateFilter(default_state))
+@router.message(Command(commands="cancel"), StateFilter(default_state))
 async def process_cancel_command(message: Message) -> None:
     """
     Handles the /cancel command for the bot.
@@ -74,7 +74,7 @@ async def process_cancel_command(message: Message) -> None:
     )
 
 
-@dp.message(Command(commands="cancel"), ~StateFilter(default_state))
+@router.message(Command(commands="cancel"), ~StateFilter(default_state))
 async def process_cancel_command_state(message: Message, state: FSMContext) -> None:
     """
     Handles the /cancel command when the bot is in a non-default state.
