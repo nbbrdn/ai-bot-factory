@@ -16,10 +16,22 @@ services:
     depends_on:
       - db
 
+  # proto:
+  #   container_name: proto
+  #   build:
+  #     context: ./proto
+  #   restart: always
+  #   env_file:
+  #     - .env
+  #   volumes:
+  #     - /var/run/docker.sock:/var/run/docker.sock
+  #   depends_on:
+  #     - db
+  
   factory:
     container_name: factory
     build:
-      context: ./factory
+      context: ./assistant-factory-bot
     restart: always
     env_file:
       - .env
@@ -27,7 +39,7 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     depends_on:
       - db
-  
+
   dozzle:
     container_name: dozzle
     restart: unless-stopped
