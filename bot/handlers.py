@@ -87,11 +87,12 @@ async def cmd_start(message: Message, state: FSMContext):
 @router.message(StateFilter(FSMIntro.read_intro))
 async def proccess_intro(message: Message, state: FSMContext) -> None:
     user_id = message.from_user.id
-    current_banner = informer["data"][user_id]
-    await message.answer(informer["intro"][current_banner])
-    informer["data"][user_id] = current_banner + 1
     if informer["data"][user_id] >= len(informer["intro"]):
         await state.clear()
+    else:
+        current_banner = informer["data"][user_id]
+        await message.answer(informer["intro"][current_banner])
+        informer["data"][user_id] = current_banner + 1
 
 
 @router.message(Command("ref"))
