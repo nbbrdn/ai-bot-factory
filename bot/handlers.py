@@ -58,12 +58,12 @@ async def cmd_start(message: Message, state: FSMContext):
         informer["data"][user_id] = 0
         current_banner = 0
     else:
-        current_banner = informer.data[user_id]
+        current_banner = informer["data"][user_id]
 
     if current_banner < len(informer["intro"]):
         await message.answer(informer["intro"][current_banner])
         current_banner += 1
-        informer["data"]["user_id"] = current_banner
+        informer["data"][user_id] = current_banner
         await state.set_state(FSMIntro.read_intro)
 
     else:
@@ -89,6 +89,22 @@ async def proccess_intro(message: Message, state: FSMContext) -> None:
     user_id = message.from_user.id
     if informer["data"][user_id] >= len(informer["intro"]):
         await state.clear()
+
+        kb = [
+            [KeyboardButton(text="Давай разберем случайный кейс")],
+            [KeyboardButton(text="Предложи список из 10 случайных кейсов")],
+        ]
+        keyboard = ReplyKeyboardMarkup(
+            keyboard=kb,
+            resize_keyboard=True,
+            input_field_placeholder="Укажите способ выбора кейса",
+        )
+
+        await message.answer(
+            ("Вы хотите выбрать кейс из предложенного списка, или выбрать случайный?"),
+            reply_markup=keyboard,
+        )
+
     else:
         current_banner = informer["data"][user_id]
         await message.answer(informer["intro"][current_banner])
