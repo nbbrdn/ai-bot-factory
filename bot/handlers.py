@@ -5,7 +5,7 @@ import config
 import external
 from aiogram import F, Router, flags
 from aiogram.enums import ChatAction
-from aiogram.filters import Command
+from aiogram.filters import Command, StateFilter
 from aiogram.types import (
     KeyboardButton,
     Message,
@@ -13,6 +13,7 @@ from aiogram.types import (
     ReplyKeyboardRemove,
 )
 from aiogram.utils.chat_action import ChatActionMiddleware
+from aiogram.fsm.state import State, StatesGroup
 from db.orm import (
     count_referrals,
     count_users,
@@ -22,6 +23,9 @@ from db.orm import (
     update_referrer,
 )
 
+from intro import informer, intro
+from aiogram.fsm.state import default_state
+
 logger = logging.getLogger(__name__)
 
 router = Router()
@@ -30,7 +34,11 @@ router.message.middleware(ChatActionMiddleware())
 threads = {}
 
 
-@router.message(Command("start"))
+class FSMIntro(StatesGroup):
+    read_intro = State()
+
+
+@router.message(Command("start"), StateFilter(default_state))
 async def cmd_start(message: Message):
     user_id = message.from_user.id
     hasref = await has_referrer(user_id)
@@ -44,6 +52,18 @@ async def cmd_start(message: Message):
                 await update_referrer(user_id, referrer_candidate)
         except ValueError:
             pass
+
+    if not user_id in informer.data:
+        informer.data[user_id] = 0
+        current_banner = 0
+    else:
+        current_banner = informer.data[user_id]
+
+    if current_banner < len(intro):
+        await message.answer(intro[current_banner])
+        current_banner += 1
+        informer.data[user_id] = current_banner
+        # TODO поменять состояние
 
     kb = [
         [KeyboardButton(text="Давай разберем случайный кейс")],
