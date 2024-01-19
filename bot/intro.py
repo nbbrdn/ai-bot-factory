@@ -1,4 +1,4 @@
-intro = [
+intro_text = [
     "Tekst 1",
     "Tekst 2",
     "Tekst 3",
@@ -8,6 +8,6 @@ intro = [
 data = {}
 
 informer = {
-    intro: intro,
-    data: data,
+    "intro": intro_text,
+    "data": data,
 }
