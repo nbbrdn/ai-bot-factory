@@ -22,6 +22,7 @@ from db.orm import (
     save_message,
     update_referrer,
 )
+from aiogram.fsm.context import FSMContext
 
 from intro import informer, intro
 from aiogram.fsm.state import default_state
@@ -39,7 +40,7 @@ class FSMIntro(StatesGroup):
 
 
 @router.message(Command("start"), StateFilter(default_state))
-async def cmd_start(message: Message):
+async def cmd_start(message: Message, state: FSMContext):
     user_id = message.from_user.id
     hasref = await has_referrer(user_id)
 
@@ -63,22 +64,34 @@ async def cmd_start(message: Message):
         await message.answer(intro[current_banner])
         current_banner += 1
         informer.data[user_id] = current_banner
-        # TODO поменять состояние
+        await state.set_state(FSMIntro.read_intro)
 
-    kb = [
-        [KeyboardButton(text="Давай разберем случайный кейс")],
-        [KeyboardButton(text="Предложи список из 10 случайных кейсов")],
-    ]
-    keyboard = ReplyKeyboardMarkup(
-        keyboard=kb,
-        resize_keyboard=True,
-        input_field_placeholder="Укажите способ выбора кейса",
-    )
+    else:
+        kb = [
+            [KeyboardButton(text="Давай разберем случайный кейс")],
+            [KeyboardButton(text="Предложи список из 10 случайных кейсов")],
+        ]
+        keyboard = ReplyKeyboardMarkup(
+            keyboard=kb,
+            resize_keyboard=True,
+            input_field_placeholder="Укажите способ выбора кейса",
+        )
 
-    await message.answer(
-        ("Вы хотите выбрать кейс из предложенного списка, или выбрать случайный?"),
-        reply_markup=keyboard,
-    )
+        await message.answer(
+            ("Вы хотите выбрать кейс из предложенного списка, или выбрать случайный?"),
+            reply_markup=keyboard,
+        )
+        await state.clear()
+
+
+@router.message(StateFilter(FSMIntro.read_intro))
+async def proccess_intro(message: Message, state: FSMContext) -> None:
+    user_id = message.from_user.id
+    current_banner = informer.data[user_id]
+    await message.answer(intro[current_banner])
+    informer.data[user_id] = current_banner + 1
+    if informer.data[user_id] >= len(intro):
+        await state.clear()
 
 
 @router.message(Command("ref"))
