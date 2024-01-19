@@ -89,7 +89,7 @@ async def proccess_intro(message: Message, state: FSMContext) -> None:
     user_id = message.from_user.id
     if informer["data"][user_id] >= len(informer["intro"]):
         await state.clear()
-
+        informer["data"][user_id] = 0
         kb = [
             [KeyboardButton(text="Давай разберем случайный кейс")],
             [KeyboardButton(text="Предложи список из 10 случайных кейсов")],
