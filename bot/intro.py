@@ -1,9 +1,5 @@
 intro_text = [
-    "Tekst 1",
-    "Tekst 2",
-    "Tekst 3",
-    "Tekst 4",
-    "tekst 5",
+    "Вас преветствует бот-тренер по переговорам",
 ]
 data = {}
 
