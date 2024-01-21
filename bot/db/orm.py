@@ -97,4 +97,4 @@ async def get_msg_cnt(user_id: int):
             stmt = select(User.msg_remain).where(User.user_id == user_id)
             result: ScalarResult = await session.execute(stmt)
             remain = result.first()
-            return remain
+            return remain[0]
