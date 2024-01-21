@@ -151,7 +151,7 @@ async def message_with_text(message: Message):
         prompt = message.text
         # logging.info(f"user (id={user_id}): {prompt}")
         await save_message(user_id, prompt, True)
-        await update_msg_cnt(user_id)
+        await update_msg_cnt(user_id, remain_messages)
 
         message = await message.answer(
             "✍️ минутку, пишу ответ ...", reply_markup=ReplyKeyboardRemove()
