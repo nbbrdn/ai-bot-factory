@@ -94,8 +94,7 @@ async def update_msg_cnt(user_id: int, remain: int):
 async def get_msg_cnt(user_id: int):
     async with session_maker() as session:
         async with session.begin():
-            stmt = select(User).where(User.user_id == user_id)
+            stmt = select(User.msg_remain).where(User.user_id == user_id)
             result: ScalarResult = await session.execute(stmt)
-            user = result.first()
-            print(user)
-            return user.msg_remain
+            remain = result.first()
+            return remain
