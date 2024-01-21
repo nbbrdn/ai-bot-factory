@@ -21,6 +21,8 @@ from db.orm import (
     is_registered,
     save_message,
     update_referrer,
+    get_msg_cnt,
+    update_msg_cnt,
 )
 from aiogram.fsm.context import FSMContext
 
@@ -138,26 +140,34 @@ async def cmd_stat(message: Message):
 @flags.chat_action(ChatAction.TYPING)
 async def message_with_text(message: Message):
     user_id = message.from_user.id
-    thread_id = threads.get(user_id, None)
+    remain_messages = get_msg_cnt(user_id)
+    if remain_messages > 0:
+        thread_id = threads.get(user_id, None)
 
-    if not thread_id:
-        thread_id = await external.create_thread()
-        threads[user_id] = thread_id
+        if not thread_id:
+            thread_id = await external.create_thread()
+            threads[user_id] = thread_id
 
-    prompt = message.text
-    # logging.info(f"user (id={user_id}): {prompt}")
-    await save_message(user_id, prompt, True)
+        prompt = message.text
+        # logging.info(f"user (id={user_id}): {prompt}")
+        await save_message(user_id, prompt, True)
+        await update_msg_cnt(user_id)
 
-    message = await message.answer(
-        "✍️ минутку, пишу ответ ...", reply_markup=ReplyKeyboardRemove()
-    )
+        message = await message.answer(
+            "✍️ минутку, пишу ответ ...", reply_markup=ReplyKeyboardRemove()
+        )
 
-    text = await external.generate_text(prompt, thread_id)
-    text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
-    text = re.sub(r"\*(.+?)\*", r"<i>\1</i>", text)
+        text = await external.generate_text(prompt, thread_id)
+        text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", text)
+        text = re.sub(r"\*(.+?)\*", r"<i>\1</i>", text)
 
-    await message.delete()
+        await message.delete()
 
-    await message.answer(text)
-    await save_message(user_id, text, False)
-    # logging.info(f"bot (id={user_id}): {text}")
+        await message.answer(text)
+        await save_message(user_id, text, False)
+    else:
+        text = (
+            "Промо-период кибер-наставника по переговорам завершён. "
+            "Чтобы продолжить им пользоваться, свяжитесь с @sgevlich"
+        )
+        await message.answer(text)

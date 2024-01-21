@@ -79,3 +79,22 @@ async def save_message(user_id: int, msg: str, user_msg: bool = True):
                 actor = "gpt"
             dialog = Dialog(user_id=user_id, actor=actor, msg=msg)
             await session.merge(dialog)
+
+
+async def update_msg_cnt(user_id: int, remain: int):
+    if remain > 0:
+        remain -= 1
+    async with session_maker() as session:
+        async with session.begin():
+            stmt = update(User).where(User.user_id == user_id).values(msg_remain=remain)
+            await session.execute(stmt)
+            await session.commit()
+
+
+async def get_msg_cnt(user_id: int):
+    async with session_maker() as session:
+        async with session.begin():
+            stmt = select(User).where(User.user_id == user_id)
+            result: ScalarResult = await session.execute(stmt)
+            user = result.first()
+            return user.msg_remain
