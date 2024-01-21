@@ -140,7 +140,7 @@ async def cmd_stat(message: Message):
 @flags.chat_action(ChatAction.TYPING)
 async def message_with_text(message: Message):
     user_id = message.from_user.id
-    remain_messages = get_msg_cnt(user_id)
+    remain_messages = await get_msg_cnt(user_id)
     if remain_messages > 0:
         thread_id = threads.get(user_id, None)
 
