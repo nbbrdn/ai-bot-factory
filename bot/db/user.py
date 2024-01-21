@@ -14,6 +14,7 @@ class User(BaseModel):
     ref_id = Column(Integer, nullable=True)
     reg_date = Column(DATE, default=datetime.date.today())
     upd_date = Column(DATE, onupdate=datetime.date.today())
+    msg_remain = Column(Integer, default=30)
 
     def __str__(self):
         return f"<User: {self.user_id}>"
