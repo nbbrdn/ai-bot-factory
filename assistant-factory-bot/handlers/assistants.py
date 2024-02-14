@@ -317,7 +317,9 @@ async def process_assistant_name_sent(message: Message, state: FSMContext) -> No
     # Сохраняем введенное имя в хранилище по ключу "assistant_name"
     await state.update_data(assistant_name=message.text)
     await message.answer(
-        text="Спасибо!\n\n А теперь введите текст инструкции для ассистента"
+        text="Спасибо!\n\n А теперь введите текст инструкции для ассистента."
+        "Можете вводить текст инструкции несколькими сообщениями."
+        "После того, как закончите вводить инструкцию, введите команду /save"
     )
     # Устанавливаем состояние ожидания ввода инструкции
     await state.set_state(FSMCreateAssistant.fill_assistant_instrustion)
@@ -330,7 +332,18 @@ async def process_assistant_instruction_sent(
     message: Message, state: FSMContext
 ) -> None:
     # Сохраняем инструкцию в хранилище по ключу "assistant_instruction"
-    await state.update_data(assistant_instruction=message.text)
+    data = await state.get_data()
+    instruction = data.get("assistant_instruction", "")
+    instruction += message.text
+
+    await state.update_data(assistant_instruction=instruction)
+
+
+# Это хэндлер срабатывает на команду /save
+@router.message(
+    Command(commands="save"), StateFilter(FSMCreateAssistant.fill_assistant_instrustion)
+)
+async def proccess_save_command(message: Message, state: FSMContext) -> None:
     await message.answer(text="Загрузите файл базы знаний")
     await state.set_state(FSMCreateAssistant.upload_assistant_file)
 
