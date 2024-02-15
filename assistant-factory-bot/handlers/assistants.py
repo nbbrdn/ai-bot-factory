@@ -301,7 +301,7 @@ async def process_assistant_delete_confirm_press(
 # Этот хэнтдер будет срабатывать на команду /newassistant
 # и переводить в состояние ожидания ввода имени ассистента
 @router.message(
-    Command(commands="newassistant"),
+    Command(commands="new"),
     StateFilter(default_state),
 )
 async def process_newassistant_command(message: Message, state: FSMContext) -> None:

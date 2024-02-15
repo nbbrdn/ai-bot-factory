@@ -95,10 +95,3 @@ async def process_cancel_command_state(message: Message, state: FSMContext) -> N
     )
 
     await state.clear()
-
-
-# Этот хэндлер будет срабатывать на любые сообщения, кроме тех
-# для которых есть отдельные хэндлеры, вне состояний
-@router.message(StateFilter(default_state))
-async def send_echo(message: Message) -> None:
-    await message.reply(text="Извините, моя твоя не понимать")
