@@ -11,6 +11,9 @@ class FSMCreateAssistant(StatesGroup):
     enter_prod_tg_token = State()
     enter_bot_instruction = State()
     upload_knoledge_base = State()
+    fill_assistant_name = State()
+    fill_assistant_instrustion = State()
+    upload_assistant_file = State()
 
 
 class FSMDeleteAssistant(StatesGroup):
