@@ -341,9 +341,7 @@ async def process_assistant_instruction_sent(
 
 
 # Это хэндлер срабатывает на команду /save
-@router.message(
-    Command(commands="save"), StateFilter(FSMCreateAssistant.fill_assistant_instrustion)
-)
+@router.message(Command(commands="save"), ~StateFilter(default_state))
 async def proccess_save_command(message: Message, state: FSMContext) -> None:
     await message.answer(text="Загрузите файл базы знаний")
     await state.set_state(FSMCreateAssistant.upload_assistant_file)
