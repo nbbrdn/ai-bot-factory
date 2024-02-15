@@ -334,7 +334,8 @@ async def process_assistant_instruction_sent(
     # Сохраняем инструкцию в хранилище по ключу "assistant_instruction"
     data = await state.get_data()
     instruction = data.get("assistant_instruction", "")
-    instruction += message.text
+    instruction = instruction + " " + message.text
+    logger.info(instruction)
 
     await state.update_data(assistant_instruction=instruction)
 
