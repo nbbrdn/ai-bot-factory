@@ -2,7 +2,8 @@ import asyncio
 import logging
 
 from handlers.common import router as common_router
-from handlers.register_user import router as register_user_router
+from handlers.users import router as users_router
+from handlers.assistants import router as assistants_router
 from loader import bot, dp
 
 logging.basicConfig(
@@ -16,7 +17,7 @@ async def on_startup():
 
 
 async def main():
-    dp.include_routers(common_router, register_user_router)
+    dp.include_routers(common_router, users_router, assistants_router)
     dp.startup.register(on_startup)
     await dp.start_polling(bot, skip_updates=True)
 
