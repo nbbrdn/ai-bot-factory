@@ -11,3 +11,13 @@ class FSMCreateAssistant(StatesGroup):
     enter_prod_tg_token = State()
     enter_bot_instruction = State()
     upload_knoledge_base = State()
+
+
+class FSMDeleteAssistant(StatesGroup):
+    enter_assistant_number = State()
+    confirm_del_action = State()
+
+
+class FSMActivateAssistant(StatesGroup):
+    activate_assistant = State()
+    use_assistant = State()
