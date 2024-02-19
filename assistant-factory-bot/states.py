@@ -24,3 +24,8 @@ class FSMDeleteAssistant(StatesGroup):
 class FSMActivateAssistant(StatesGroup):
     activate_assistant = State()
     use_assistant = State()
+
+
+class FSMCreditUser(StatesGroup):
+    enter_user_id = State()
+    enter_credit = State()

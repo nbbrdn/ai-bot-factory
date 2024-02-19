@@ -16,6 +16,7 @@ from openai import OpenAI
 from aiogram.fsm.context import FSMContext
 from states import FSMActivateAssistant, FSMCreateAssistant, FSMDeleteAssistant
 from loader import bot
+from db.orm import get_msg_cnt, decrease_msg_remain
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s:%(name)s:%(levelname)s:%(message)s"
@@ -169,6 +170,15 @@ async def process_activate_assistant_number_sent(
 
 @router.message(StateFilter(FSMActivateAssistant.use_assistant))
 async def proccess_assistant_conversation(message: Message, state: FSMContext) -> None:
+    telegram_user_id = message.from_user.id
+    cnt = await get_msg_cnt(telegram_user_id)
+    if cnt <= 0:
+        await message.answer(
+            "Вы исчерпали свой лимит запросов к ChatGPG. Для пополнения баланса - обратитесь к @sgevlich"
+        )
+        await state.clear()
+        return
+
     data = await state.get_data()
     thread_id = data["thread_id"]
     assistant_id = data["assistant_id"]
@@ -198,6 +208,7 @@ async def proccess_assistant_conversation(message: Message, state: FSMContext) -
         logging.ERROR(f"got unexpected openai status: {keep_retrieving_status}")
         await message.answer(text="Ой... что-то пошло не так :(")
 
+    decrease_msg_remain(telegram_user_id)
     all_messages = client.beta.threads.messages.list(thread_id=data["thread_id"])
     gpt_response = all_messages.data[0].content[0].text.value
     await message.answer(gpt_response)

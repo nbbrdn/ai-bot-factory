@@ -1,15 +1,18 @@
-from sqlalchemy import VARCHAR, BigInteger, Column, ForeignKey, Integer
+from sqlalchemy import VARCHAR, BigInteger, Column, ForeignKey, Integer, Boolean
 
 from .base import Base, Model
 
 
 class User(Base, Model):
     __tablename__ = "users"
+
     id = Column(Integer, primary_key=True, autoincrement=True)
     tg_user_id = Column(BigInteger, unique=True, nullable=False)
     tg_username = Column(VARCHAR(32))
     phone = Column(VARCHAR(11))
     email = Column(VARCHAR(32))
+    is_admin = Column(Boolean, default=False)
+    msg_remain = Column(Integer, default=0)
     comment = Column(VARCHAR(250))
 
 
