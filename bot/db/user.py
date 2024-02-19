@@ -7,7 +7,7 @@ from .base import BaseModel
 
 
 class User(BaseModel):
-    __tablename__ = "users"
+    __tablename__ = "negotiator_users"
 
     user_id = Column(Integer, unique=True, nullable=False, primary_key=True)
     username = Column(VARCHAR(32))

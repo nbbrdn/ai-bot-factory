@@ -19,7 +19,7 @@ def get_db_connection():
 def index():
     conn = get_db_connection()
     cur = conn.cursor()
-    cur.execute("SELECT * FROM dialogs;")
+    cur.execute("SELECT * FROM negotiator_dialogs;")
     dialogs = cur.fetchall()
     cur.close()
     conn.close()

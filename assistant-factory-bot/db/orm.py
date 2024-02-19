@@ -25,7 +25,9 @@ async def get_msg_cnt(user_id: int):
             stmt = select(User.msg_remain).where(User.tg_user_id == user_id)
             result: ScalarResult = await session.execute(stmt)
             remain = result.first()
-            return remain[0]
+            if remain:
+                return remain[0]
+            return 0
 
 
 async def decrease_msg_remain(user_id: int):
@@ -44,16 +46,18 @@ async def is_admin(user_id: int) -> bool:
     async with session_maker() as session:
         async with session.begin():
             stmt = select(User).where(User.tg_user_id == user_id)
-            user = await session.execute(stmt).scalar()
+            result = await session.execute(stmt)
+            user = result.scalar()
             return user is not None and user.is_admin
 
 
 async def user_exists(user_id: int) -> bool:
     async with session_maker() as session:
         async with session.begin():
-            user = await session.execute(
+            result = await session.execute(
                 select(User).where(User.tg_user_id == user_id)
-            ).scalar()
+            )
+            user = result.scalar()
             return user is not None
 
 
@@ -66,4 +70,12 @@ async def add_credits(user_id: int, credits: int):
                 .values(msg_remain=User.msg_remain + credits)
             )
             await session.execute(stmt)
+            await session.commit()
+
+
+async def add_user(user_id: int, username: str):
+    async with session_maker() as session:
+        async with session.begin():
+            new_user = User(tg_user_id=user_id, tg_username=username)
+            session.add(new_user)
             await session.commit()

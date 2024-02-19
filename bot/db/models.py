@@ -6,7 +6,7 @@ from .base import BaseModel
 
 
 class Dialog(BaseModel):
-    __tablename__ = "dialogs"
+    __tablename__ = "negotiator_dialogs"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     user_id = Column(Integer, nullable=False)

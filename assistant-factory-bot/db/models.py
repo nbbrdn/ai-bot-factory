@@ -1,10 +1,10 @@
 from sqlalchemy import VARCHAR, BigInteger, Column, ForeignKey, Integer, Boolean
 
-from .base import Base, Model
+from .base import BaseModel, Model
 
 
-class User(Base, Model):
-    __tablename__ = "users"
+class User(BaseModel, Model):
+    __tablename__ = "factory_users"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     tg_user_id = Column(BigInteger, unique=True, nullable=False)
@@ -16,11 +16,11 @@ class User(Base, Model):
     comment = Column(VARCHAR(250))
 
 
-class Project(Base, Model):
-    __tablename__ = "projects"
+class Project(BaseModel, Model):
+    __tablename__ = "factory_projects"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    owner_id = Column(Integer, ForeignKey("factory_users.id"), nullable=False)
     comment = Column(VARCHAR(250))
     assistant_id = Column(VARCHAR(250))
     file_id = Column(VARCHAR(250))

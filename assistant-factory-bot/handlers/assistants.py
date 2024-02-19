@@ -208,7 +208,7 @@ async def proccess_assistant_conversation(message: Message, state: FSMContext) -
         logging.ERROR(f"got unexpected openai status: {keep_retrieving_status}")
         await message.answer(text="Ой... что-то пошло не так :(")
 
-    decrease_msg_remain(telegram_user_id)
+    await decrease_msg_remain(telegram_user_id)
     all_messages = client.beta.threads.messages.list(thread_id=data["thread_id"])
     gpt_response = all_messages.data[0].content[0].text.value
     await message.answer(gpt_response)

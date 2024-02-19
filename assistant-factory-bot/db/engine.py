@@ -16,16 +16,3 @@ async def proceed_schemas(engine: AsyncEngine, metadata) -> None:
 
 def get_session_maker(engine: AsyncEngine) -> sessionmaker:
     return sessionmaker(engine, class_=AsyncSession)
-
-
-postgres_url = URL.create(
-    "postgresql+asyncpg",
-    username=config.POSTGRES_USER,
-    password=config.POSTGRES_PASSWORD,
-    host="db",
-    port=5432,
-    database=config.POSTGRES_DB,
-)
-
-async_engine = create_async_engine(postgres_url)
-sessionmaker = get_session_maker(async_engine)

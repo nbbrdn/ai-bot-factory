@@ -4,6 +4,8 @@ from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import default_state
 from aiogram.types import Message
 
+from db.orm import user_exists, add_user
+
 router = Router()
 
 
@@ -23,6 +25,14 @@ async def proccess_start_command(message: Message) -> None:
     Returns:
         None
     """
+
+    exists = await user_exists(message.from_user.id)
+    if not exists:
+        id = message.from_user.id
+        username = message.from_user.username
+        print(id, username)
+        await add_user(id, username)
+
     await message.answer(
         text="Привет!\n\nЯ - бот, который поможет создать тебе "
         "своего собственного Telegram-бота, обладающего возможностями "

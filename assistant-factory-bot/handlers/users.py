@@ -11,14 +11,14 @@ from states import FSMCreditUser
 router = Router()
 
 
-@router.message(Command(commands="balance"), StateFilter(default_state))
+@router.message(Command("balance"))
 async def process_balance_command(message: Message) -> None:
     telegram_user_id = message.from_user.id
     cnt = await get_msg_cnt(telegram_user_id)
     await message.answer(text=f"Ваш баланс: {cnt} сообщений.")
 
 
-@router.message(Command(commands="credit"), StateFilter(default_state))
+@router.message(Command("credit"), StateFilter(default_state))
 async def process_credit_command(message: Message, state: FSMContext) -> None:
     telegram_user_id = message.from_user.id
     is_user_admin = await is_admin(telegram_user_id)
@@ -37,7 +37,7 @@ async def process_credit_command(message: Message, state: FSMContext) -> None:
 
 @router.message(StateFilter(FSMCreditUser.enter_user_id))
 async def process_entered_user_id(message: Message, state: FSMContext) -> None:
-    user_id = message.text
+    user_id = int(message.text)
     found = await user_exists(user_id)
     if not found:
         await message.answer(
