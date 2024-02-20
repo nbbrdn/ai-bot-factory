@@ -61,8 +61,8 @@ async def process_entered_user_id(message: Message, state: FSMContext) -> None:
         return
 
     await message.answer(
-        text=f"Введите сумму кредитов, которые будут начислены "
-        "пользователю с id: {user_id}"
+        text="Введите сумму кредитов, которые будут начислены "
+        f"пользователю с id: {user_id}"
     )
     await state.set_state(FSMCreditUser.enter_credit)
 
@@ -79,7 +79,7 @@ async def process_create_user_confirm_press(
 
         user = await add_user(user_id=user_id)
         if user:
-            await callback.answer(
+            await callback.message.edit_text(
                 text=f"Введите сумму кредитов, которые будут начислены "
                 "пользователю с id: {user_id}"
             )
