@@ -43,7 +43,7 @@ router = Router()
 client = OpenAI(api_key=OPENAI_TOKEN)
 
 
-@router.message(Command(commands="assistants"), StateFilter(default_state))
+@router.message(Command(commands="list"), StateFilter(default_state))
 async def process_assistants_command(message: Message) -> None:
     """
     Handles the /assistants command to list user-specific assistants.
@@ -81,7 +81,7 @@ async def process_assistants_command(message: Message) -> None:
         )
 
 
-@router.message(Command(commands="startassistant"), StateFilter(default_state))
+@router.message(Command(commands="run"), StateFilter(default_state))
 async def process_startassistant_command(message: Message, state: FSMContext) -> None:
     """
     Handles the /startassistant command to initiate interaction with a specific
@@ -162,7 +162,7 @@ async def process_activate_assistant_number_sent(
 
         await message.answer(
             text="Можете начинать общение с асисстентом.\n\n"
-            "Чтобы закончить общение, введите команду /stopassistant"
+            "Чтобы закончить общение, введите команду /cancel"
         )
 
         await state.set_state(FSMActivateAssistant.use_assistant)
@@ -214,24 +214,10 @@ async def proccess_assistant_conversation(message: Message, state: FSMContext) -
     await message.answer(gpt_response)
 
 
-@router.message(
-    Command(commands="stopassistant"), StateFilter(FSMActivateAssistant.use_assistant)
-)
-async def process_cancel_assistant_conversation_state(
-    message: Message, state: FSMContext
-) -> None:
-    await message.answer(
-        text="Вы прервали общение с асисстентом\n\n"
-        "Чтобы снова перейти к общению - "
-        "отправьте команду /startassistant"
-    )
-    await state.clear()
-
-
-# Этот хэндлер будет срабатывать на команду /delassistant, выводить
+# Этот хэндлер будет срабатывать на команду /del, выводить
 # список асисстентов пользователя и переводить в состояние ожидания ввода номера
 # ассистента для удаления
-@router.message(Command(commands="delassistant"), StateFilter(default_state))
+@router.message(Command(commands="del"), StateFilter(default_state))
 async def process_delassistant_command(message: Message, state: FSMContext) -> None:
     my_assistants = []
     telegram_user_id = message.from_user.id
@@ -309,7 +295,7 @@ async def process_assistant_delete_confirm_press(
     await state.clear()
 
 
-# Этот хэнтдер будет срабатывать на команду /newassistant
+# Этот хэнтдер будет срабатывать на команду /new
 # и переводить в состояние ожидания ввода имени ассистента
 @router.message(
     Command(commands="new"),

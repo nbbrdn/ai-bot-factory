@@ -41,28 +41,6 @@ async def proccess_start_command(message: Message) -> None:
     )
 
 
-@router.message(Command(commands="help"), StateFilter(default_state))
-async def proccess_help_command(message: Message) -> None:
-    """
-    Handles the /help command for the bot.
-
-    Sends a list of the bot commands.
-
-    Args:
-        message (Message): The incoming message object.
-
-    Returns:
-        None
-    """
-    await message.answer(
-        text="Команды бота:\n\n"
-        "/start - активирует бота\n\n"
-        "/stop - останавливает бота\n\n"
-        "/reg - запускает процесс регистрации пользователя\n\n"
-        "/new - запускает процесс создания асисстента\n\n"
-    )
-
-
 @router.message(Command(commands="cancel"), StateFilter(default_state))
 async def process_cancel_command(message: Message) -> None:
     """
