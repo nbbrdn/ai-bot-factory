@@ -217,7 +217,7 @@ async def proccess_assistant_conversation(message: Message, state: FSMContext) -
     text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", gpt_response)
     text = re.sub(r"\*(.+?)\*", r"<i>\1</i>", text)
 
-    await message.answer(gpt_response)
+    await message.answer(text)
 
 
 # Этот хэндлер будет срабатывать на команду /del, выводить
