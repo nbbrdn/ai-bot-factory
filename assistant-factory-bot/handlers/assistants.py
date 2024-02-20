@@ -174,7 +174,8 @@ async def proccess_assistant_conversation(message: Message, state: FSMContext) -
     cnt = await get_msg_cnt(telegram_user_id)
     if cnt <= 0:
         await message.answer(
-            "Вы исчерпали свой лимит запросов к ChatGPG. Для пополнения баланса - обратитесь к @sgevlich"
+            "Вы исчерпали свой лимит запросов к ChatGPG. "
+            "Для пополнения баланса - обратитесь к @sgevlich"
         )
         await state.clear()
         return
@@ -244,7 +245,7 @@ async def process_delassistant_command(message: Message, state: FSMContext) -> N
         await state.set_state(FSMDeleteAssistant.enter_assistant_number)
     else:
         await message.answer(
-            text="У вас нет асисстентов. Чтобы создать, введите команду /newassistant"
+            text="У вас нет асисстентов. Чтобы создать, введите команду /new"
         )
         await state.clear()
 

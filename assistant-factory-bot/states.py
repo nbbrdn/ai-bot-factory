@@ -29,3 +29,5 @@ class FSMActivateAssistant(StatesGroup):
 class FSMCreditUser(StatesGroup):
     enter_user_id = State()
     enter_credit = State()
+    reg_user = State()
+    confirm_reg_user = State()

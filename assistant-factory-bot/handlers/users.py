@@ -1,11 +1,16 @@
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.filters import Command, StateFilter
 from aiogram.fsm.state import default_state
-from aiogram.types import Message
+from aiogram.types import (
+    CallbackQuery,
+    Message,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+)
 
 from aiogram.fsm.context import FSMContext
 
-from db.orm import get_msg_cnt, is_admin, user_exists, add_credits
+from db.orm import get_msg_cnt, is_admin, user_exists, add_credits, add_user
 from states import FSMCreditUser
 
 router = Router()
@@ -30,7 +35,8 @@ async def process_credit_command(message: Message, state: FSMContext) -> None:
         return
 
     await message.answer(
-        text="Вы собираетесь пополнить баланс запросов к ChatGPT для пользователя Telegram. Введите ID пользователя:"
+        text="Вы собираетесь пополнить баланс запросов к ChatGPT для пользователя "
+        "Telegram. Введите ID пользователя:"
     )
     await state.set_state(FSMCreditUser.enter_user_id)
 
@@ -38,19 +44,50 @@ async def process_credit_command(message: Message, state: FSMContext) -> None:
 @router.message(StateFilter(FSMCreditUser.enter_user_id))
 async def process_entered_user_id(message: Message, state: FSMContext) -> None:
     user_id = int(message.text)
+    await state.update_data(credit_user_id=user_id)
+
     found = await user_exists(user_id)
     if not found:
+        yes_button = InlineKeyboardButton(text="Да", callback_data="yes")
+        no_button = InlineKeyboardButton(text="Нет", callback_data="no")
+        keyboard: list[list[InlineKeyboardButton]] = [[yes_button, no_button]]
+        markup = InlineKeyboardMarkup(inline_keyboard=keyboard)
         await message.answer(
-            text=f"Пользователь с ID {user_id} в списке пользователей бота не найден."
+            text=f"Пользователь с ID {user_id} в списке пользователей бота не найден.\n"
+            "Зегеристрировать нового пользователя фабрики c указанным ID?",
+            reply_markup=markup,
         )
-        await state.clear()
+        await state.set_state(FSMCreditUser.confirm_reg_user)
         return
 
-    await state.update_data(credit_user_id=user_id)
     await message.answer(
-        text=f"Введите сумму кредитов, которые будут начислены пользователю с id: {user_id}"
+        text=f"Введите сумму кредитов, которые будут начислены "
+        "пользователю с id: {user_id}"
     )
     await state.set_state(FSMCreditUser.enter_credit)
+
+
+@router.callback_query(
+    StateFilter(FSMCreditUser.confirm_reg_user), F.data.in_(["yes", "no"])
+)
+async def process_create_user_confirm_press(
+    callback: CallbackQuery, state: FSMContext
+) -> None:
+    if callback.data == "yes":
+        data = await state.get_data()
+        user_id = data.get("credit_user_id")
+
+        user = await add_user(user_id=user_id)
+        if user:
+            await callback.answer(
+                text=f"Введите сумму кредитов, которые будут начислены "
+                "пользователю с id: {user_id}"
+            )
+            await state.set_state(FSMCreditUser.enter_credit)
+            return
+
+    await callback.message.edit_text(text="Создание пользователя отменено!")
+    await state.clear()
 
 
 @router.message(StateFilter(FSMCreditUser.enter_credit))

@@ -25,7 +25,7 @@ async def get_msg_cnt(user_id: int):
             stmt = select(User.msg_remain).where(User.tg_user_id == user_id)
             result: ScalarResult = await session.execute(stmt)
             remain = result.first()
-            if remain:
+            if remain and remain[0]:
                 return remain[0]
             return 0
 
@@ -73,9 +73,10 @@ async def add_credits(user_id: int, credits: int):
             await session.commit()
 
 
-async def add_user(user_id: int, username: str):
+async def add_user(user_id: int, username: str = None):
     async with session_maker() as session:
         async with session.begin():
             new_user = User(tg_user_id=user_id, tg_username=username)
             session.add(new_user)
             await session.commit()
+            return new_user
