@@ -1,6 +1,7 @@
 import os
 import logging
 import time
+import re
 
 from aiogram import Router, F
 from aiogram.filters import Command, StateFilter
@@ -212,6 +213,10 @@ async def proccess_assistant_conversation(message: Message, state: FSMContext) -
     await decrease_msg_remain(telegram_user_id)
     all_messages = client.beta.threads.messages.list(thread_id=data["thread_id"])
     gpt_response = all_messages.data[0].content[0].text.value
+
+    text = re.sub(r"\*\*(.+?)\*\*", r"<b>\1</b>", gpt_response)
+    text = re.sub(r"\*(.+?)\*", r"<i>\1</i>", text)
+
     await message.answer(gpt_response)
 
 
