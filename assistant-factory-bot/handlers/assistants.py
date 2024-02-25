@@ -78,7 +78,7 @@ async def process_assistants_command(message: Message) -> None:
         await message.answer(text=text)
     else:
         await message.answer(
-            text="У вас нет асисстентов. Чтобы создать, введите команду /newassistant"
+            text="У вас нет асисстентов. Чтобы создать, введите команду /new"
         )
 
 
@@ -123,7 +123,7 @@ async def process_startassistant_command(message: Message, state: FSMContext) ->
         await state.set_state(FSMActivateAssistant.activate_assistant)
     else:
         await message.answer(
-            text="У вас нет асисстентов. Чтобы создать, введите команду /newassistant"
+            text="У вас нет асисстентов. Чтобы создать, введите команду /new"
         )
         await state.clear()
 
