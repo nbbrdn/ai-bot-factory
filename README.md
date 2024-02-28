@@ -43,4 +43,4 @@ docker-compose up -d
 Feel free to contribute to this project by forking the repository and creating pull requests. Any improvements or new features are welcome!
 
 ## License
-This project is licensed under the MIT License.
+This project is licensed under the MIT License
