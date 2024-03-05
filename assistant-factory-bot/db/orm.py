@@ -95,6 +95,7 @@ async def add_assistant(tg_user_id: int, assistant_id: str, assistant_name: str 
                     owner_id=user.id, assistant_id=assistant_id, name=assistant_name
                 )
                 session.add(new_assistant)
+                await session.commit()
             else:
                 print(f"Пользователь с tg_user_id {tg_user_id} не найден.")
 
