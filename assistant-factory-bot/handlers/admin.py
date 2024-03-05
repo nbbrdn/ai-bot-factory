@@ -1,9 +1,19 @@
 import os
+import logging
 
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 from openai import OpenAI
+
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s:%(name)s:%(levelname)s:%(message)s"
+)
+logger = logging.getLogger(__name__)
+
+logging.getLogger("httpx").setLevel(logging.ERROR)
+logging.getLogger("aiogram.dispatcher").setLevel(logging.ERROR)
+logging.getLogger("aiogram.event").setLevel(logging.ERROR)
 
 from db.orm import add_assistant, get_assistant_by_id, is_admin
 
@@ -42,6 +52,9 @@ async def process_init_command(message: Message) -> None:
 
                     db_assistant = await get_assistant_by_id(assistant_id)
                     if not (db_assistant):
+                        logging.info(
+                            f"add assistant: {tg_user_id}, {assistant_id}, {assistant_name}"
+                        )
                         add_assistant(tg_user_id, assistant_id, assistant_name)
 
                 except ValueError:
