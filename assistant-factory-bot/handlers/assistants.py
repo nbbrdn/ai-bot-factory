@@ -69,7 +69,7 @@ async def process_assistants_command(message: Message) -> None:
             if client_id == telegram_user_id:
                 my_assistants.append({"id": assistant.id, "name": assistant.name}) """
 
-    user = get_user_by_tg_user_id(telegram_user_id)
+    user = await get_user_by_tg_user_id(telegram_user_id)
     if user:
         my_assistants = await get_assistants_by_user_id(user.id)
 
