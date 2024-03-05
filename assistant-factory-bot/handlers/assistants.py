@@ -16,6 +16,7 @@ from openai import OpenAI
 from aiogram.fsm.context import FSMContext
 from states import FSMActivateAssistant, FSMCreateAssistant, FSMDeleteAssistant
 from loader import bot
+from db.models import User
 from db.orm import (
     add_assistant,
     decrease_msg_remain,
