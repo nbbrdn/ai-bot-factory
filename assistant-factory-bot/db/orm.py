@@ -116,10 +116,10 @@ async def get_assistants_by_user_id(user_id: int):
     async with session_maker() as session:
         async with session.begin():
             assistents = await session.execute(
-                select(Assistant).where(Assistant.owner_id == user_id).all()
+                select(Assistant).where(Assistant.owner_id == user_id)
             )
 
-            return assistents
+            return assistents.fetchAll()
 
 
 async def get_user_id_by_tg_user_id(tg_user_id: int) -> User:
