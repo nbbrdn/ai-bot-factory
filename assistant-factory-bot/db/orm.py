@@ -108,9 +108,8 @@ async def get_assistant_by_id(assistant_id: str):
             result = await session.execute(
                 select(Assistant).where(Assistant.assistant_id == assistant_id)
             )
-            assistant = result.scalar()
 
-            return assistant
+            return result.scalar()
 
 
 async def get_assistants_by_user_id(user_id: int):
@@ -121,3 +120,12 @@ async def get_assistants_by_user_id(user_id: int):
             )
 
             return assistents
+
+
+async def get_user_by_tg_user_id(tg_user_id: int):
+    async with session_maker() as session:
+        async with session.begin():
+            result = await session.execute(
+                select(User).where(User.tg_user_id == tg_user_id)
+            )
+            return result.scalar()

@@ -16,7 +16,13 @@ from openai import OpenAI
 from aiogram.fsm.context import FSMContext
 from states import FSMActivateAssistant, FSMCreateAssistant, FSMDeleteAssistant
 from loader import bot
-from db.orm import get_msg_cnt, decrease_msg_remain, add_assistant
+from db.orm import (
+    add_assistant,
+    decrease_msg_remain,
+    get_assistants_by_user_id,
+    get_msg_cnt,
+    get_user_by_tg_user_id,
+)
 from config import logging
 
 OPENAI_TOKEN = os.environ.get("OPENAI_TOKEN")
@@ -38,7 +44,7 @@ client = OpenAI(api_key=OPENAI_TOKEN)
 @router.message(Command(commands="list"), StateFilter(default_state))
 async def process_assistants_command(message: Message) -> None:
     """
-    Handles the /assistants command to list user-specific assistants.
+    Handles the /list command to list user-specific assistants.
 
     Retrieves and displays a list of assistants associated with the user's Telegram ID.
 
@@ -48,10 +54,11 @@ async def process_assistants_command(message: Message) -> None:
     Returns:
         None
     """
-    my_assistants = []
     telegram_user_id = message.from_user.id
-    assistants = client.beta.assistants.list(limit=100)
-    data = assistants.data
+    # my_assistants = []
+    # assistants = client.beta.assistants.list(limit=100)
+
+    """ data = assistants.data
     for assistant in data:
         metadata = assistant.metadata
         if "client_id" in metadata:
@@ -60,7 +67,11 @@ async def process_assistants_command(message: Message) -> None:
             except ValueError:
                 client_id = 0
             if client_id == telegram_user_id:
-                my_assistants.append({"id": assistant.id, "name": assistant.name})
+                my_assistants.append({"id": assistant.id, "name": assistant.name}) """
+
+    user = get_user_by_tg_user_id(telegram_user_id)
+    if user:
+        my_assistants = get_assistants_by_user_id(user.id)
 
     if my_assistants:
         text = ""
