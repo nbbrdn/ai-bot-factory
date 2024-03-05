@@ -128,4 +128,9 @@ async def get_user_by_tg_user_id(tg_user_id: int) -> User:
             result = await session.execute(
                 select(User).where(User.tg_user_id == tg_user_id)
             )
-            return result.scalar()
+            user = result.scalar()
+            if user:
+                session.expunge(user)
+                session.add(user)
+
+            return user
