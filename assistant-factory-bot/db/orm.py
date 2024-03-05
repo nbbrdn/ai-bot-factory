@@ -115,8 +115,8 @@ async def get_assistant_by_id(assistant_id: str):
 async def get_assistants_by_user_id(user_id: int):
     async with session_maker() as session:
         async with session.begin():
-            assistents = await (
-                session.execute(Assistant).where(Assistant.owner_id == user_id).all()
+            assistents = await session.execute(
+                select(Assistant).where(Assistant.owner_id == user_id).all()
             )
 
             return assistents
