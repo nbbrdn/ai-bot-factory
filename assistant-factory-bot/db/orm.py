@@ -9,7 +9,7 @@ from sqlalchemy.engine import URL, ScalarResult
 from .models import User, Assistant
 
 logging.basicConfig(
-    level=logging.ERROR, format="%(asctime)s:%(name)s:%(levelname)s:%(message)s"
+    level=logging.INFO, format="%(asctime)s:%(name)s:%(levelname)s:%(message)s"
 )
 logger = logging.getLogger(__name__)
 
