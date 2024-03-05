@@ -1,5 +1,4 @@
 import os
-import logging
 import time
 import re
 
@@ -18,15 +17,7 @@ from aiogram.fsm.context import FSMContext
 from states import FSMActivateAssistant, FSMCreateAssistant, FSMDeleteAssistant
 from loader import bot
 from db.orm import get_msg_cnt, decrease_msg_remain, add_assistant
-
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s:%(name)s:%(levelname)s:%(message)s"
-)
-logger = logging.getLogger(__name__)
-
-logging.getLogger("httpx").setLevel(logging.ERROR)
-logging.getLogger("aiogram.dispatcher").setLevel(logging.ERROR)
-logging.getLogger("aiogram.event").setLevel(logging.ERROR)
+from config import logging
 
 OPENAI_TOKEN = os.environ.get("OPENAI_TOKEN")
 WORK_DIR = os.path.abspath(os.path.dirname(__file__))

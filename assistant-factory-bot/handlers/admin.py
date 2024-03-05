@@ -1,21 +1,12 @@
 import os
-import logging
 
 from aiogram import Router
 from aiogram.filters import Command
 from aiogram.types import Message
 from openai import OpenAI
 
-logging.basicConfig(
-    level=logging.INFO, format="%(asctime)s:%(name)s:%(levelname)s:%(message)s"
-)
-logger = logging.getLogger(__name__)
-
-logging.getLogger("httpx").setLevel(logging.ERROR)
-logging.getLogger("aiogram.dispatcher").setLevel(logging.ERROR)
-logging.getLogger("aiogram.event").setLevel(logging.ERROR)
-
 from db.orm import add_assistant, get_assistant_by_id, is_admin
+from config import logging
 
 OPENAI_TOKEN = os.environ.get("OPENAI_TOKEN")
 
