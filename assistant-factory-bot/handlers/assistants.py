@@ -22,7 +22,7 @@ from db.orm import (
     decrease_msg_remain,
     get_assistants_by_user_id,
     get_msg_cnt,
-    get_user_by_tg_user_id,
+    get_user_id_by_tg_user_id,
 )
 from config import logging
 
@@ -70,9 +70,9 @@ async def process_assistants_command(message: Message) -> None:
             if client_id == telegram_user_id:
                 my_assistants.append({"id": assistant.id, "name": assistant.name}) """
 
-    user = await get_user_by_tg_user_id(telegram_user_id)
-    if user:
-        my_assistants = await get_assistants_by_user_id(user.id)
+    user_id = await get_user_id_by_tg_user_id(telegram_user_id)
+    if user_id:
+        my_assistants = await get_assistants_by_user_id(user_id)
 
     if my_assistants:
         text = ""

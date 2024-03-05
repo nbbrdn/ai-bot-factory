@@ -122,7 +122,7 @@ async def get_assistants_by_user_id(user_id: int):
             return assistents
 
 
-async def get_user_by_tg_user_id(tg_user_id: int) -> User:
+async def get_user_id_by_tg_user_id(tg_user_id: int) -> User:
     async with session_maker() as session:
         async with session.begin():
             result = await session.execute(
@@ -130,7 +130,4 @@ async def get_user_by_tg_user_id(tg_user_id: int) -> User:
             )
             user = result.scalar()
             if user:
-                session.expunge(user)
-                session.add(user)
-
-            return user
+                return user.id
