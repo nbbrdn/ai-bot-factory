@@ -4,7 +4,7 @@ from db.engine import create_async_engine, get_session_maker
 from sqlalchemy import select, update
 from sqlalchemy.engine import URL, ScalarResult
 
-from .models import User
+from .models import User, Assistant
 
 postgres_url = URL.create(
     "postgresql+asyncpg",
@@ -80,3 +80,33 @@ async def add_user(user_id: int, username: str = None):
             session.add(new_user)
             await session.commit()
             return new_user
+
+
+async def add_assistant(tg_user_id: int, assistant_id: str, assistant_name: str = None):
+    async with session_maker() as session:
+        async with session.begin():
+            user = session.query(User).filter_by(tg_user_id=tg_user_id).first()
+
+            if user:
+                new_assistant = Assistant(
+                    owner_id=user.id, assistant_id=assistant_id, name=assistant_name
+                )
+                session.add(new_assistant)
+            else:
+                print(f"Пользователь с tg_user_id {tg_user_id} не найден.")
+
+
+async def get_assistant_by_id(assistant_id: str):
+    async with session_maker() as session:
+        assistant = (
+            session.query(Assistant).filter_by(assistant_id=assistant_id).first()
+        )
+
+        return assistant
+
+
+async def get_assistants_by_user_id(user_id: int):
+    async with session_maker() as session:
+        assistents = session.query(Assistant).filter_by(owner_id=user_id).all()
+
+        return assistents

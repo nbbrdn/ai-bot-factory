@@ -4,6 +4,7 @@ import logging
 from handlers.common import router as common_router
 from handlers.users import router as users_router
 from handlers.assistants import router as assistants_router
+from handlers.admin import router as admin_rouner
 from loader import bot, dp
 
 from sqlalchemy.engine import URL
@@ -21,7 +22,7 @@ async def on_startup():
 
 
 async def main():
-    dp.include_routers(common_router, users_router, assistants_router)
+    dp.include_routers(common_router, users_router, assistants_router, admin_rouner)
     dp.startup.register(on_startup)
 
     postgres_url = URL.create(

@@ -24,3 +24,12 @@ class Project(BaseModel, Model):
     comment = Column(VARCHAR(250))
     assistant_id = Column(VARCHAR(250))
     file_id = Column(VARCHAR(250))
+
+
+class Assistant(BaseModel, Model):
+    __tablename__ = "factory_assistants"
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    owner_id = Column(Integer, ForeignKey("factory_users.id"), nullable=False)
+    assistant_id = Column(VARCHAR(250))
+    name = Column(VARCHAR(250))

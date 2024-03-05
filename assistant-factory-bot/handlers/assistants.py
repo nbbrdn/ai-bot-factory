@@ -17,7 +17,7 @@ from openai import OpenAI
 from aiogram.fsm.context import FSMContext
 from states import FSMActivateAssistant, FSMCreateAssistant, FSMDeleteAssistant
 from loader import bot
-from db.orm import get_msg_cnt, decrease_msg_remain
+from db.orm import get_msg_cnt, decrease_msg_remain, add_assistant
 
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s:%(name)s:%(levelname)s:%(message)s"
@@ -369,7 +369,7 @@ async def process_assistant_file_upload(message: Message, state: FSMContext) -> 
 
     data = await state.get_data()
 
-    client.beta.assistants.create(
+    assistant = client.beta.assistants.create(
         name=data["assistant_name"],
         instructions=data["assistant_instruction"],
         model="gpt-4-1106-preview",
@@ -377,6 +377,8 @@ async def process_assistant_file_upload(message: Message, state: FSMContext) -> 
         metadata={"client_id": message.from_user.id},
         file_ids=file_ids,
     )
+
+    await add_assistant(message.from_user.id, assistant.id, assistant.name)
 
     # Завершаем машину состояний
     await state.clear()
