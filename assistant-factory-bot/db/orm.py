@@ -85,7 +85,10 @@ async def add_user(user_id: int, username: str = None):
 async def add_assistant(tg_user_id: int, assistant_id: str, assistant_name: str = None):
     async with session_maker() as session:
         async with session.begin():
-            user = session.query(User).filter_by(tg_user_id=tg_user_id).first()
+            result = await session.execute(
+                select(User).where(User.tg_user_id == tg_user_id)
+            )
+            user = result.scalar()
 
             if user:
                 new_assistant = Assistant(
@@ -99,9 +102,10 @@ async def add_assistant(tg_user_id: int, assistant_id: str, assistant_name: str 
 async def get_assistant_by_id(assistant_id: str):
     async with session_maker() as session:
         async with session.begin():
-            assistant = (
-                session.query(Assistant).filter_by(assistant_id=assistant_id).first()
+            result = await session.execute(
+                select(Assistant).where(Assistant.assistant_id == assistant_id)
             )
+            assistant = result.scalar()
 
             return assistant
 
@@ -109,6 +113,8 @@ async def get_assistant_by_id(assistant_id: str):
 async def get_assistants_by_user_id(user_id: int):
     async with session_maker() as session:
         async with session.begin():
-            assistents = session.query(Assistant).filter_by(owner_id=user_id).all()
+            assistents = (
+                session.execute(Assistant).where(Assistant.owner_id == user_id).all()
+            )
 
             return assistents
