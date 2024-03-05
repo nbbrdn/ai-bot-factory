@@ -6,6 +6,7 @@ from sqlalchemy import select, update
 from sqlalchemy.engine import URL, ScalarResult
 
 from .models import User, Assistant
+from config import logging
 
 postgres_url = URL.create(
     "postgresql+asyncpg",
@@ -97,8 +98,9 @@ async def add_assistant(tg_user_id: int, assistant_id: str, assistant_name: str 
                 )
                 session.add(new_assistant)
                 await session.flush()
+                logging.info(f"Saved assistant: {new_assistant.assistant_id}")
             else:
-                print(f"Пользователь с tg_user_id {tg_user_id} не найден.")
+                logging.info(f"Пользователь с tg_user_id {tg_user_id} не найден.")
 
 
 async def get_assistant_by_id(assistant_id: str):
