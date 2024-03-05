@@ -1,10 +1,17 @@
 import config
+import logging
+
 from db.engine import create_async_engine, get_session_maker
 
 from sqlalchemy import select, update
 from sqlalchemy.engine import URL, ScalarResult
 
 from .models import User, Assistant
+
+logging.basicConfig(
+    level=logging.ERROR, format="%(asctime)s:%(name)s:%(levelname)s:%(message)s"
+)
+logger = logging.getLogger(__name__)
 
 postgres_url = URL.create(
     "postgresql+asyncpg",
@@ -83,7 +90,7 @@ async def add_user(user_id: int, username: str = None):
 
 
 async def add_assistant(tg_user_id: int, assistant_id: str, assistant_name: str = None):
-    print(tg_user_id, assistant_id, assistant_name)
+    logger.info(f"{tg_user_id}, {assistant_id}, {assistant_name}")
 
     async with session_maker() as session:
         async with session.begin():
