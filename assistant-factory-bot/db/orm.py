@@ -98,15 +98,17 @@ async def add_assistant(tg_user_id: int, assistant_id: str, assistant_name: str 
 
 async def get_assistant_by_id(assistant_id: str):
     async with session_maker() as session:
-        assistant = (
-            session.query(Assistant).filter_by(assistant_id=assistant_id).first()
-        )
+        async with session.begin():
+            assistant = (
+                session.query(Assistant).filter_by(assistant_id=assistant_id).first()
+            )
 
-        return assistant
+            return assistant
 
 
 async def get_assistants_by_user_id(user_id: int):
     async with session_maker() as session:
-        assistents = session.query(Assistant).filter_by(owner_id=user_id).all()
+        async with session.begin():
+            assistents = session.query(Assistant).filter_by(owner_id=user_id).all()
 
-        return assistents
+            return assistents
