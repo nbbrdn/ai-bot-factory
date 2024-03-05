@@ -119,7 +119,7 @@ async def get_assistants_by_user_id(user_id: int):
                 select(Assistant).where(Assistant.owner_id == user_id)
             )
 
-            return assistents.fetchAll()
+            return assistents.all()
 
 
 async def get_user_id_by_tg_user_id(tg_user_id: int) -> User:
