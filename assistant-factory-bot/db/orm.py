@@ -91,7 +91,6 @@ async def add_assistant(tg_user_id: int, assistant_id: str, assistant_name: str 
                 select(User).where(User.tg_user_id == tg_user_id)
             )
             user = result.scalar()
-
             if user:
                 new_assistant = Assistant(
                     owner_id=user.id, assistant_id=assistant_id, name=assistant_name
