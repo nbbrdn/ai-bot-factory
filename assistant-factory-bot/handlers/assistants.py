@@ -59,7 +59,7 @@ async def process_assistants_command(message: Message) -> None:
     """
     my_assistants = []
     telegram_user_id = message.from_user.id
-    assistants = client.beta.assistants.list()
+    assistants = client.beta.assistants.list(limit=100)
     data = assistants.data
     for assistant in data:
         metadata = assistant.metadata
@@ -100,7 +100,7 @@ async def process_startassistant_command(message: Message, state: FSMContext) ->
     """
     my_assistants = []
     telegram_user_id = message.from_user.id
-    assistants = client.beta.assistants.list()
+    assistants = client.beta.assistants.list(limit=100)
     data = assistants.data
     for assistant in data:
         metadata = assistant.metadata
@@ -227,7 +227,7 @@ async def proccess_assistant_conversation(message: Message, state: FSMContext) -
 async def process_delassistant_command(message: Message, state: FSMContext) -> None:
     my_assistants = []
     telegram_user_id = message.from_user.id
-    assistants = client.beta.assistants.list()
+    assistants = client.beta.assistants.list(limit=100)
     data = assistants.data
     for assistant in data:
         metadata = assistant.metadata
