@@ -46,7 +46,7 @@ async def process_init_command(message: Message) -> None:
                         logging.info(
                             f"add assistant: {tg_user_id}, {assistant_id}, {assistant_name}"
                         )
-                        add_assistant(tg_user_id, assistant_id, assistant_name)
+                        await add_assistant(tg_user_id, assistant_id, assistant_name)
 
                 except ValueError:
                     await message.answer(
