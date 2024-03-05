@@ -71,7 +71,7 @@ async def process_assistants_command(message: Message) -> None:
 
     user = get_user_by_tg_user_id(telegram_user_id)
     if user:
-        my_assistants = get_assistants_by_user_id(user.id)
+        my_assistants = await get_assistants_by_user_id(user.id)
 
     if my_assistants:
         text = ""
