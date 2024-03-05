@@ -83,6 +83,8 @@ async def add_user(user_id: int, username: str = None):
 
 
 async def add_assistant(tg_user_id: int, assistant_id: str, assistant_name: str = None):
+    print(tg_user_id, assistant_id, assistant_name)
+
     async with session_maker() as session:
         async with session.begin():
             result = await session.execute(
@@ -95,7 +97,7 @@ async def add_assistant(tg_user_id: int, assistant_id: str, assistant_name: str 
                     owner_id=user.id, assistant_id=assistant_id, name=assistant_name
                 )
                 session.add(new_assistant)
-                await session.commit()
+                await session.flush()
             else:
                 print(f"Пользователь с tg_user_id {tg_user_id} не найден.")
 
