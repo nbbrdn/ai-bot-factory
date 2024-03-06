@@ -19,6 +19,7 @@ class User(BaseModel, Model):
     assistants: Mapped[List["Assistant"]] = relationship(back_populates="user")
 
 
+"""
 class Project(BaseModel, Model):
     __tablename__ = "factory_projects"
 
@@ -36,6 +37,7 @@ class Project(BaseModel, Model):
             f"assistant_id={self.assistant_id!r}, "
             f"file_id={self.file_id!r})"
         )
+"""
 
 
 class Assistant(BaseModel, Model):
