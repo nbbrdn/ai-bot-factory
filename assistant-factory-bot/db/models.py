@@ -16,6 +16,7 @@ class User(BaseModel, Model):
     is_admin = Column(Boolean, default=False)
     msg_remain = Column(Integer, default=0)
     comment = Column(VARCHAR(250))
+
     assistants: Mapped[List["Assistant"]] = relationship(back_populates="user")
 
 
@@ -47,6 +48,8 @@ class Assistant(BaseModel, Model):
     owner_id: Mapped[int] = mapped_column(ForeignKey("factory_users.id"))
     assistant_id: Mapped[str] = mapped_column(String(250))
     name: Mapped[str] = mapped_column(String(250))
+
+    user: Mapped["User"] = relationship(back_populates="assistants")
 
     def __repr__(self) -> str:
         return (
