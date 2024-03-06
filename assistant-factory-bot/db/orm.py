@@ -127,7 +127,7 @@ async def get_assistants_by_user_id(user_id: int):
         async with session.begin():
             stmt = select(Assistant).where(Assistant.owner_id == user_id)
             result = await session.execute(stmt)
-            assistants = result.scalar().all()
+            assistants = result.scalars().all()
             return assistants
 
 
