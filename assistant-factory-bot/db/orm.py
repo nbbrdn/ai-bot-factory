@@ -113,27 +113,20 @@ async def get_assistant_by_id(assistant_id: str):
             return result.scalar()
 
 
-"""
- stmt = select(User.msg_remain).where(User.tg_user_id == user_id)
-            result: ScalarResult = await session.execute(stmt)
-            remain = result.first()
-            if remain and remain[0]:
-                return remain[0]
-            return 0
-"""
-
-
 async def get_assistants_by_user_id(user_id: int) -> List[Assistant]:
     async with session_maker() as session:
         async with session.begin():
-            stmt = select(Assistant).where(Assistant.owner_id == user_id)
-            result = await session.execute(stmt)
-            assistants = result.scalars().all()
+            result = await session.execute(
+                select(User).where(User.tg_user_id == user_id)
+            )
+            user = result.scalar()
 
-            for assistant in assistants:
-                session.refresh(assistant)
-
-            return assistants
+            if user:
+                assistants = user.assistants
+                return assistants
+            else:
+                # Возвращаем пустой список, если пользователь не найден
+                return []
 
 
 async def get_user_id_by_tg_user_id(tg_user_id: int) -> User:

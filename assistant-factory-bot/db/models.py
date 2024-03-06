@@ -20,27 +20,6 @@ class User(BaseModel, Model):
     assistants: Mapped[List["Assistant"]] = relationship(back_populates="user")
 
 
-"""
-class Project(BaseModel, Model):
-    __tablename__ = "factory_projects"
-
-    id: Mapped[int] = mapped_column(primary_key=True)
-    owner_id: Mapped[int] = mapped_column(ForeignKey("factory_users.id", nullable=True))
-    comment: Mapped[str] = mapped_column(String(250))
-    assistant_id: Mapped[str] = mapped_column(String(250))
-    file_id: Mapped[str] = mapped_column(String(250))
-
-    def __repr__(self) -> str:
-        return (
-            f"Project("
-            f"id={self.id!r}, "
-            f"owner_id={self.owner_id!r}, "
-            f"assistant_id={self.assistant_id!r}, "
-            f"file_id={self.file_id!r})"
-        )
-"""
-
-
 class Assistant(BaseModel, Model):
     __tablename__ = "factory_assistants"
 
