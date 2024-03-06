@@ -56,19 +56,6 @@ async def process_assistants_command(message: Message) -> None:
         None
     """
     telegram_user_id = message.from_user.id
-    # my_assistants = []
-    # assistants = client.beta.assistants.list(limit=100)
-
-    """ data = assistants.data
-    for assistant in data:
-        metadata = assistant.metadata
-        if "client_id" in metadata:
-            try:
-                client_id = int(metadata["client_id"])
-            except ValueError:
-                client_id = 0
-            if client_id == telegram_user_id:
-                my_assistants.append({"id": assistant.id, "name": assistant.name}) """
 
     user_id = await get_user_id_by_tg_user_id(telegram_user_id)
     if user_id:
