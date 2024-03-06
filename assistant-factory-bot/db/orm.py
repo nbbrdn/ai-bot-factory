@@ -116,17 +116,10 @@ async def get_assistant_by_id(assistant_id: str):
 async def get_assistants_by_user_id(user_id: int) -> List[Assistant]:
     async with session_maker() as session:
         async with session.begin():
-            result = await session.execute(
-                select(User).where(User.tg_user_id == user_id)
-            )
-            user = result.scalar()
-
-            if user:
-                assistants = user.assistants
-                return assistants
-            else:
-                # Возвращаем пустой список, если пользователь не найден
-                return []
+            query = select(Assistant).where(Assistant.owner_id == user_id)
+            result = await session.execute(query)
+            assistants = result.scalars().all()
+            return assistants
 
 
 async def get_user_id_by_tg_user_id(tg_user_id: int) -> User:
