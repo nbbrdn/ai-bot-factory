@@ -112,11 +112,22 @@ async def get_assistant_by_id(assistant_id: str):
             return result.scalar()
 
 
+"""
+ stmt = select(User.msg_remain).where(User.tg_user_id == user_id)
+            result: ScalarResult = await session.execute(stmt)
+            remain = result.first()
+            if remain and remain[0]:
+                return remain[0]
+            return 0
+"""
+
+
 async def get_assistants_by_user_id(user_id: int):
     async with session_maker() as session:
-        result = await session.execute(select(User).filter_by(id=user_id))
-        user = result.scalar()
-        return user.assistants.scalar() if user else None
+        async with session.begin():
+            stmt = select(Assistant).where(Assistant.user_id == user_id)
+            result: ScalarResult = await session.execute(stmt)
+            return result
 
 
 async def get_user_id_by_tg_user_id(tg_user_id: int) -> User:
