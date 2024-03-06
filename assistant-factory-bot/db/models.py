@@ -33,3 +33,8 @@ class Assistant(BaseModel, Model):
     owner_id = Column(Integer, ForeignKey("factory_users.id"), nullable=False)
     assistant_id = Column(VARCHAR(250))
     name = Column(VARCHAR(250))
+
+    def __init__(self, owner_id, assistant_id, name):
+        self.owner_id = owner_id
+        self.assistant_id = assistant_id
+        self.name = name
