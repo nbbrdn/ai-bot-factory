@@ -130,9 +130,8 @@ async def get_assistants_by_user_id(user_id: int) -> List[Assistant]:
             result = await session.execute(stmt)
             assistants = result.scalars().all()
 
-            session.expunge_all()
-            session.add_all(assistants)
-            session.commit()
+            for assistant in assistants:
+                session.refresh(assistant)
 
             return assistants
 
