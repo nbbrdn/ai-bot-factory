@@ -77,7 +77,7 @@ async def process_assistants_command(message: Message) -> None:
     if my_assistants:
         text = ""
         for i, assistant in enumerate(my_assistants, start=1):
-            text += f"{i}. {assistant['name']}\n"
+            text += f"{i}. {assistant.name}\n"
         await message.answer(text=text)
     else:
         await message.answer(
@@ -350,7 +350,6 @@ async def process_assistant_instruction_sent(
     data = await state.get_data()
     instruction = data.get("assistant_instruction", "")
     instruction += message.text
-    logger.info(instruction)
 
     await state.update_data(assistant_instruction=instruction)
 

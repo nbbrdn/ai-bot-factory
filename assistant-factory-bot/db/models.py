@@ -1,4 +1,6 @@
-from sqlalchemy import VARCHAR, BigInteger, Column, ForeignKey, Integer, Boolean
+from typing import List
+from sqlalchemy import VARCHAR, BigInteger, Column, ForeignKey, Integer, Boolean, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from .base import BaseModel, Model
 
@@ -14,30 +16,44 @@ class User(BaseModel, Model):
     is_admin = Column(Boolean, default=False)
     msg_remain = Column(Integer, default=0)
     comment = Column(VARCHAR(250))
+    assistants: Mapped[List["Assistant"]] = relationship(back_populates="user")
 
 
 class Project(BaseModel, Model):
     __tablename__ = "factory_projects"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    owner_id = Column(Integer, ForeignKey("factory_users.id"), nullable=False)
-    comment = Column(VARCHAR(250))
-    assistant_id = Column(VARCHAR(250))
-    file_id = Column(VARCHAR(250))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    owner_id: Mapped[int] = mapped_column(
+        ForeignKey("factory_users.id", nullable=False)
+    )
+    comment: Mapped[str] = mapped_column(String(250))
+    assistant_id: Mapped[str] = mapped_column(String(250))
+    file_id: Mapped[str] = mapped_column(String(250))
+
+    def __repr__(self) -> str:
+        return (
+            f"Project("
+            f"id={self.id!r}, "
+            f"owner_id={self.owner_id!r}, "
+            f"assistant_id={self.assistant_id!r}, "
+            f"file_id={self.file_id!r})"
+        )
 
 
 class Assistant(BaseModel, Model):
     __tablename__ = "factory_assistants"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    owner_id = Column(Integer, ForeignKey("factory_users.id"), nullable=False)
-    assistant_id = Column(VARCHAR(250))
-    name = Column(VARCHAR(250))
+    id: Mapped[int] = mapped_column(primary_key=True)
+    owner_id: Mapped[int] = mapped_column(ForeignKey("factory_users.id"))
+    assistant_id: Mapped[str] = mapped_column(String(250))
+    name: Mapped[str] = mapped_column(String(250))
 
-    def __init__(self, owner_id, assistant_id, name):
-        self.owner_id = owner_id
-        self.assistant_id = assistant_id
-        self.name = name
-
-    def __str__(self):
-        return f"Assistant: id={self.id}, owner_id={self.owner_id}, assistant_id={self.assistant_id}, name={self.name}"
+    def __repr__(self) -> str:
+        return (
+            f"Assistant("
+            f"id={self.id!r}, "
+            f"owner_id={self.owner_id!r}, "
+            f"assistant_id={self.assistant_id!r}, "
+            f"name={self.name!r}"
+            f")"
+        )

@@ -115,11 +115,8 @@ async def get_assistant_by_id(assistant_id: str):
 async def get_assistants_by_user_id(user_id: int):
     async with session_maker() as session:
         async with session.begin():
-            assistants = await session.execute(
-                select(Assistant).where(Assistant.owner_id == user_id)
-            )
-
-            return [dict(assistant) for assistant in assistants.all()]
+            user = await session.query(User).get(user_id)
+            return user.assistants
 
 
 async def get_user_id_by_tg_user_id(tg_user_id: int) -> User:
