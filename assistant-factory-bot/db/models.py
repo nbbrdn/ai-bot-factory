@@ -38,3 +38,6 @@ class Assistant(BaseModel, Model):
         self.owner_id = owner_id
         self.assistant_id = assistant_id
         self.name = name
+
+    def __str__(self):
+        return f"Assistant: id={self.id}, owner_id={self.owner_id}, assistant_id={self.assistant_id}, name={self.name}"
