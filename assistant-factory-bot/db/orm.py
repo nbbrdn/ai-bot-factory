@@ -125,7 +125,7 @@ async def get_assistant_by_id(assistant_id: str):
 async def get_assistants_by_user_id(user_id: int):
     async with session_maker() as session:
         async with session.begin():
-            stmt = select(Assistant).where(Assistant.user_id == user_id)
+            stmt = select(Assistant).where(Assistant.owner_id == user_id)
             result: ScalarResult = await session.execute(stmt)
             return result
 
