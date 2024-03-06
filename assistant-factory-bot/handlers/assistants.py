@@ -75,6 +75,7 @@ async def process_assistants_command(message: Message) -> None:
         my_assistants = await get_assistants_by_user_id(user_id)
 
     if my_assistants:
+        logging.info(my_assistants)
         text = ""
         for i, assistant in enumerate(my_assistants, start=1):
             logging.info(f"DBG: {str(assistant)}")
