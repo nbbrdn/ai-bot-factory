@@ -115,8 +115,9 @@ async def get_assistant_by_id(assistant_id: str):
 async def get_assistants_by_user_id(user_id: int):
     async with session_maker() as session:
         async with session.begin():
-            user = await session.execute(select(User).filter_by(id=user_id))
-            return user.assistants
+            result = await session.execute(select(User).filter_by(id=user_id))
+            user = result.scalar()
+            return user.assistants if user else None
 
 
 async def get_user_id_by_tg_user_id(tg_user_id: int) -> User:
