@@ -23,9 +23,7 @@ class Project(BaseModel, Model):
     __tablename__ = "factory_projects"
 
     id: Mapped[int] = mapped_column(primary_key=True)
-    owner_id: Mapped[int] = mapped_column(
-        ForeignKey("factory_users.id", nullable=False)
-    )
+    owner_id: Mapped[int] = mapped_column(ForeignKey("factory_users.id", nullable=True))
     comment: Mapped[str] = mapped_column(String(250))
     assistant_id: Mapped[str] = mapped_column(String(250))
     file_id: Mapped[str] = mapped_column(String(250))
