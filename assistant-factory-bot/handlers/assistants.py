@@ -64,7 +64,6 @@ async def process_assistants_command(message: Message) -> None:
     if my_assistants:
         text = ""
         for i, assistant in enumerate(my_assistants, start=1):
-            logging.INFO(assistant)
             text += f"{i}. {assistant.name}\n"
         await message.answer(text=text)
     else:
