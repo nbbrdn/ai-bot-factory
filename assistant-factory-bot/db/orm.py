@@ -115,11 +115,11 @@ async def get_assistant_by_id(assistant_id: str):
 async def get_assistants_by_user_id(user_id: int):
     async with session_maker() as session:
         async with session.begin():
-            assistents = await session.execute(
+            assistants = await session.execute(
                 select(Assistant).where(Assistant.owner_id == user_id)
             )
 
-            return assistents.all()
+            return assistants.all()
 
 
 async def get_user_id_by_tg_user_id(tg_user_id: int) -> User:
