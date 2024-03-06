@@ -1,4 +1,5 @@
 import config
+from typing import List
 
 from db.engine import create_async_engine, get_session_maker
 
@@ -122,12 +123,17 @@ async def get_assistant_by_id(assistant_id: str):
 """
 
 
-async def get_assistants_by_user_id(user_id: int):
+async def get_assistants_by_user_id(user_id: int) -> List[Assistant]:
     async with session_maker() as session:
         async with session.begin():
             stmt = select(Assistant).where(Assistant.owner_id == user_id)
             result = await session.execute(stmt)
             assistants = result.scalars().all()
+
+            session.expunge_all()
+            session.add_all(assistants)
+            session.commit()
+
             return assistants
 
 
