@@ -325,6 +325,14 @@ async def process_assistant_name_sent(message: Message, state: FSMContext) -> No
     Command(commands="save"), StateFilter(FSMCreateAssistant.fill_assistant_instrustion)
 )
 async def proccess_save_command(message: Message, state: FSMContext) -> None:
+    data = await state.get_data()
+    instruction = data.get("assistant_instruction", "")
+    if not instruction:
+        await message.answer(
+            text="Кажется, вы забыли ввести текст инструкции. Попробуйте еще раз!"
+        )
+        return
+
     await message.answer(text="Загрузите файл базы знаний")
     await state.set_state(FSMCreateAssistant.upload_assistant_file)
 
